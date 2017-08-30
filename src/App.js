@@ -8,10 +8,10 @@ class App extends Component {
       <div className="App">
         <div className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
+          <h2>Shine Bright with React & Firebase</h2>
         </div>
         <p className="App-intro">
-          FIREBASE - React App and Codeship CI
+          Testing the Codeship integration
         </p>
       </div>
     );
