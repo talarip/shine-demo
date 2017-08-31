@@ -11,7 +11,7 @@ class App extends Component {
           <h2>Shine Bright with React & Firebase</h2>
         </div>
         <p className="App-intro">
-          Testing the Codeship integration!!
+          Testing the Codeship integration!!!
         </p>
       </div>
     );
