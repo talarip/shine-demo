@@ -17,7 +17,7 @@ class App extends Component {
           <h2>Shine Bright with React & Firebase</h2>
         </div>
         <p className="App-intro">
-          Testing the Codeship integration!!!
+          Building the Shine Bright System!!!
         </p>
         <div className="container">
           <Login handleLogin={this.handleLogin.bind(this)} />
