@@ -2,8 +2,13 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Login from './Login';
+import { firebaseApp } from './firebaseApp';
 
 class App extends Component {
+  handleLogin() {
+
+  }
+
   render() {
     return (
       <div className="App">
@@ -14,7 +19,9 @@ class App extends Component {
         <p className="App-intro">
           Testing the Codeship integration!!!
         </p>
-        <Login />
+        <div className="container">
+          <Login handleLogin={this.handleLogin.bind(this)} />
+        </div>
       </div>
     );
   }
