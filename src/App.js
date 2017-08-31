@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Login from './Login';
-// import { firebaseApp } from './firebaseApp';
+import {db} from './db';
 
 class App extends Component {
   handleLogin() {
-
+    console.log(db);
   }
 
   render() {

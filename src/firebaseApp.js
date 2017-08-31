@@ -9,6 +9,7 @@ const config = {
   storageBucket: "dm-shine-bright.appspot.com",
 };
 
+firebase.initializeApp(config);
 export const firebaseApp = firebase;
 
 export const createUser = function(email, password) {
@@ -19,8 +20,8 @@ export const createUser = function(email, password) {
     .catch(function(error) {
       console.log(error);
       // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
+      // var errorCode = error.code;
+      // var errorMessage = error.message;
     });
 };
 
@@ -36,7 +37,7 @@ export const login = function(email, password, onAuthStateChange = (user) => con
     .catch(function(error) {
       console.log(error)
       // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
+      // const errorCode = error.code;
+      // const errorMessage = error.message;
     });
 };
