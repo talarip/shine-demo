@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-// import { firebaseApp } from './firebaseApp';
 
-class Login extends Component {
-  signIn(e) {
+class CreateAccount extends Component {
+  createAcct(e) {
     e.preventDefault();
     const form = e.target.form;
 
@@ -11,12 +10,12 @@ class Login extends Component {
       password: form.elements.password.value
     }
 
-    this.props.handleLogin(creds);
+    this.props.handleCreateAccount(creds);
   }
 
   render() {
     return (
-      <div className="Login">
+      <div className="CreateAccount">
         <form>
           <div className="form-group">
             <label htmlFor="exampleInputEmail1">Email address</label>
@@ -26,11 +25,11 @@ class Login extends Component {
             <label htmlFor="exampleInputPassword1">Password</label>
             <input type="password" className="form-control" id="exampleInputPassword1" name="password" placeholder="Password" />
           </div>
-          <button className="btn btn-primary" onClick={this.signIn.bind(this)}>Sign In</button>
+          <button className="btn btn-primary" onClick={this.createAcct.bind(this)}>Get Started</button>
         </form>
       </div>
     );
   }
 }
 
-export default Login;
+export default CreateAccount;

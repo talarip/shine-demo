@@ -12,11 +12,15 @@ const config = {
 firebase.initializeApp(config);
 export const firebaseApp = firebase;
 
+export const isAuth = function() {
+  return !!firebase.auth().currentUser;
+};
+
 export const createUser = function(email, password) {
   firebase
     .auth()
     .createUserWithEmailAndPassword(email, password)
-    .then(() => console.log('create account complete'))
+    .then((user) => console.log('create account complete', user))
     .catch(function(error) {
       console.log(error);
       // Handle Errors here.
@@ -25,15 +29,24 @@ export const createUser = function(email, password) {
     });
 };
 
+export const logout = function() {
+  const isLoggedIn = firebase.auth().currentUser;
+  if (isLoggedIn) {
+    firebase.auth().signOut();
+  }
+};
+
+export const setOnAuthChange = (fnc) => {
+  firebase
+    .auth()
+    .onAuthStateChanged(fnc);
+};
+
 export const login = function(email, password, onAuthStateChange = (user) => console.log(user)) {
   firebase
     .auth()
-    .onAuthStateChanged(onAuthStateChange);
-
-  firebase
-    .auth()
     .signInWithEmailAndPassword(email, password)
-    .then(() => console.log('sign in complete'))
+    .then((user) => console.log('sign in complete', user))
     .catch(function(error) {
       console.log(error)
       // Handle Errors here.
