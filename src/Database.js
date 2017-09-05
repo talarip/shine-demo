@@ -4,7 +4,7 @@ export const Database = (firebaseApp) => {
   }
 
   // Create An Instance If It Does Not Exist
-  const db = firebaseApp.database();
+  const db = firebaseApp.database;
   window.db = db;
   return db;
 };

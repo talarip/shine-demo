@@ -16,11 +16,11 @@ export const isAuth = function() {
   return !!firebase.auth().currentUser;
 };
 
-export const createUser = function(email, password) {
+export const createUser = function(email, password, fnc = (user) => console.log('user created', user)) {
   firebase
     .auth()
     .createUserWithEmailAndPassword(email, password)
-    .then((user) => console.log('create account complete', user))
+    .then(fnc)
     .catch(function(error) {
       console.log(error);
       // Handle Errors here.
@@ -42,11 +42,11 @@ export const setOnAuthChange = (fnc) => {
     .onAuthStateChanged(fnc);
 };
 
-export const login = function(email, password, onAuthStateChange = (user) => console.log(user)) {
+export const login = function(email, password, fnc = (user) => console.log(user)) {
   firebase
     .auth()
     .signInWithEmailAndPassword(email, password)
-    .then((user) => console.log('sign in complete', user))
+    .then(fnc)
     .catch(function(error) {
       console.log(error)
       // Handle Errors here.
