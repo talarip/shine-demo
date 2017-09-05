@@ -4,7 +4,7 @@ class Home extends Component {
   render() {
     return (
       <div className="Home">
-        <h1>Sign Bright</h1>
+        <h1>Shine Bright</h1>
       </div>
     );
   }
