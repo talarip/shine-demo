@@ -33,7 +33,7 @@ class App extends Component {
         .once('value')
         .then((data) => {
           const user = data.val();
-          console.log(user);
+          console.log('current user', user);
 
           this.setState({
             uid: uid,
@@ -117,8 +117,21 @@ class App extends Component {
         return;
       }
 
-      console.log(user);
-      this.setState({uid: user.uid});
+      const uid = user.uid;
+      const currentUserRef = db().ref('Users/' + uid)
+      currentUserRef
+        .once('value')
+        .then((data) => {
+          const user = data.val();
+          console.log('current user', user);
+
+          this.setState({
+            uid: uid,
+            email: user.email,
+            uname: user.uname,
+            netId: user.netId
+          });
+        });
     });
   }
 
