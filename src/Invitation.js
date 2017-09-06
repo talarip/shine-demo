@@ -22,15 +22,6 @@ class Invitation extends Component {
     form.elements.inviteEmail.value = '';
   }
 
-  listInvitations() {
-    console.log(this.props.userData);
-    return (
-      <li>
-
-      </li>
-    )
-  }
-
   render() {
     return (
       <div>
@@ -42,8 +33,6 @@ class Invitation extends Component {
           </div>
           <button className="btn btn-primary" onClick={this.invite}>Invite Now</button>
         </form>
-        <h4>Invitations</h4>
-
       </div>
     )
   }

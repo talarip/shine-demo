@@ -17,12 +17,17 @@ const Invitations = (props) => {
     return null;
   }
 
-  return (<ul>
-    {props.invitations.map(
-      (invitation, index) =>
-        <li key={index}>{invitation.email + ' - ' + invitation.accepted}</li>
-    )}
-  </ul>);
+  return (
+    <div>
+      <h4>Invitations</h4>
+      <ul>
+        {props.invitations.map(
+          (invitation, index) =>
+            <li key={index}>{invitation.email + ' - ' + invitation.accepted}</li>
+        )}
+      </ul>
+    </div>
+  );
 };
 
 class App extends Component {
