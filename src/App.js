@@ -11,7 +11,19 @@ const refUsers = db().ref('Users');
 const refNetworks = db().ref('Networks');
 const refInvitations = db().ref('Invitations');
 
-console.log(db);
+const Invitations = (props) => {
+  console.log('invitations props', props);
+  if (!props.uid || !props.invitations || !props.invitations.length) {
+    return null;
+  }
+
+  return (<ul>
+    {props.invitations.map(
+      (invitation, index) =>
+        <li key={index}>{invitation.email + ' - ' + invitation.accepted}</li>
+    )}
+  </ul>);
+};
 
 class App extends Component {
   constructor(props) {
@@ -20,7 +32,8 @@ class App extends Component {
       uid: null,
       email: null,
       uname: null,
-      netId: null
+      netId: null,
+      invitations: []
     };
   }
 
@@ -41,6 +54,8 @@ class App extends Component {
             uname: user.uname,
             netId: user.netId
           });
+
+          this.queryInvitations();
         });
     });
   }
@@ -77,7 +92,8 @@ class App extends Component {
         uid: user.uid,
         email: user.email,
         uname: uname,
-        netId: userNetwork.key
+        netId: userNetwork.key,
+        invitations: []
       });
     });
   }
@@ -109,6 +125,53 @@ class App extends Component {
     logout();
   }
 
+  queryInvitations() {
+    if (!this.state.netId) {
+      return '';
+    }
+
+    return refInvitations
+      .child(this.state.netId)
+      .once('value')
+      .then((data) => {
+        return data.val();
+      })
+      .then((invitations) => {
+        if (!invitations) {
+          return '';
+        }
+
+        const invitationsList = Object
+          .keys(invitations)
+          .map((key) => {
+            return {
+              'email': invitations[key].email,
+              'accepted': (invitations[key].accepted ? 'Accepted' : 'Pending')
+            };
+          });
+
+        this.setState({
+          invitations: invitationsList
+        })
+      })
+  }
+
+  renderInvitations() {
+    if (!this.uid || !this.state.invitations || !this.state.invitations.length) {
+      return '';
+    }
+
+
+    return this
+      .state
+      .invitations
+      .map((invitation) => {
+        return (
+          <li>{invitation.email + '-' + invitation.accepted}</li>
+        );
+      })
+  }
+
   componentDidMount() {
     console.log('logging in');
     setOnAuthChange((user) => {
@@ -131,9 +194,14 @@ class App extends Component {
             uname: user.uname,
             netId: user.netId
           });
+
+          this.queryInvitations();
+
         });
     });
   }
+
+
 
   render() {
     return (
@@ -145,7 +213,8 @@ class App extends Component {
           { !this.state.uid  ? <CreateAccount handleCreateAccount={this.handleCreateAccount.bind(this)} /> : ''}
           { !this.state.uid  ? <hr className="hr-text" data-content="Or" /> : ''}
           { !this.state.uid  ? <Login handleLogin={this.handleLogin.bind(this)} /> : ''}
-          { !!this.state.uid ? <Invitation handleInvite={this.handleInvite.bind(this)} /> : '' }
+          { !!this.state.uid ? <Invitation userData={this.state} handleInvite={this.handleInvite.bind(this)} /> : '' }
+          <Invitations {...this.state} />
           { !!this.state.uid ? <button onClick={this.handleLogOut.bind(this)}>Logout</button> : '' }
         </div>
       </div>
