@@ -10,6 +10,7 @@ import {
 import { firebaseApp, login, setOnAuthChange, logout, createUser } from './firebaseApp';
 import { Database } from './Database';
 import Invitation from './Invitation';
+import Network from './Network'
 const db = Database(firebaseApp);
 const refUsers = db().ref('Users');
 const refNetworks = db().ref('Networks');
@@ -28,6 +29,7 @@ class Main extends Component {
       handleCreateAccount: this.handleCreateAccount.bind(this),
       handleInvite: this.handleInvite.bind(this),
       handleLogOut: this.handleLogOut.bind(this),
+      handleJoinNetworkNotAuth: this.handleJoinNetworkNotAuth.bind(this),
       queryInvitations: this.queryInvitations.bind(this),
       renderInvitations: this.renderInvitations.bind(this)
     };
@@ -57,7 +59,7 @@ class Main extends Component {
   }
 
   handleCreateAccount(creds) {
-    createUser(creds.email, creds.password, (user) => {
+    return createUser(creds.email, creds.password, (user) => {
       const uname = user.email.split('@')[0];
 
       console.log('adding user', user);
@@ -74,6 +76,15 @@ class Main extends Component {
 
       const userInfo = refUsers.child(user.uid);
 
+      this.setState({
+        uid: user.uid,
+        email: user.email,
+        uname: uname,
+        netId: userNetwork.key,
+        invitations: []
+      });
+
+
       userInfo
         .set({
           email: user.email,
@@ -83,14 +94,6 @@ class Main extends Component {
             [userNetwork.key]: userNetwork.key
           }
         });
-
-      this.setState({
-        uid: user.uid,
-        email: user.email,
-        uname: uname,
-        netId: userNetwork.key,
-        invitations: []
-      });
     });
   }
 
@@ -109,6 +112,36 @@ class Main extends Component {
       });
   }
 
+  handleJoinNetworkNotAuth(joinInfo) {
+    const {netId, invitationId, email, password} = joinInfo;
+    console.log('joinInfo', joinInfo);
+
+    // KtJGOrUlqlT_sA_ShAl/KtJKzgmA_CI999WJo5f
+
+    // First Attempt To Create User Account
+    this
+      .handleCreateAccount({email, password})
+      .then(() => {
+        console.log('isPromise', true);
+      })
+      .catch((err) => console.log('error', err))
+      .then(() => console.log('continue'))
+
+    // const refPath = [netId, invitationId].join('\/');
+    //
+    // const userInvitations = refInvitations.child(refPath);
+    // console.log('userInvitations', userInvitations);
+
+    // if (!userInvitations) {
+    //   console.log('failed');
+    // } else {
+    //   console.log('success');
+    //   userInvitations
+    //     .
+    // }
+
+    // console.log('userInvitations', userInvitations);
+  }
 
   handleLogOut() {
     this.setState({
@@ -201,18 +234,19 @@ class Main extends Component {
       <Router>
         <div>
           <AuthButton/>
-          <ul>
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/protected">Protected Page</Link></li>
-          </ul>
-
-          <hr />
 
           <Route exact path="/" {...this.state} render={(props) => {
             return <App {...this.state} />
           }} />
 
-          <Route path="/network/:netId/:invitationId" render={(props) => <Network {...props} /> } />
+          <Route path="/network/:netId/:invitationId" render={
+              (props) => {
+                const routeProps = {...this.state, ...props};
+                return <Network {...routeProps} />;
+              }
+            }
+          />
+
           <PrivateRoute path="/protected" component={Protected}/>
         </div>
       </Router>
@@ -259,22 +293,6 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
   }}/>
 )
 
-const parseId = (id) => /^[a-zA-Z0-9_]+$/.test(id) ? id : null;
-const Network = ({match}) => {
-  const netId = parseId(match.params.netId);
-  const invitationId = parseId(match.params.invitationId);
-
-  if (!netId) {
-    return null;
-  }
-
-  return (
-      <div>
-        My Network Id: {netId} <br />
-        Invitation Id: {invitationId} <br />
-      </div>
-    );
-}
 const Protected = () => <h3>Protected</h3>;
 
 class LoginExample extends React.Component {
