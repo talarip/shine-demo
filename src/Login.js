@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-// import { firebaseApp } from './firebaseApp';
 
 class Login extends Component {
   signIn(e) {

@@ -11,6 +11,7 @@ import { firebaseApp, login, setOnAuthChange, logout, createUser } from './fireb
 import { Database } from './Database';
 import Invitation from './Invitation';
 import Network from './Network'
+import Dashboard from './Dashboard';
 const db = Database(firebaseApp);
 const refUsers = db().ref('Users');
 const refNetworks = db().ref('Networks');
@@ -35,6 +36,7 @@ class Main extends Component {
     };
   }
 
+  // Login
   handleLogin(creds) {
     console.log('creds', creds);
     login(creds.email, creds.password, (user) => {
@@ -58,6 +60,7 @@ class Main extends Component {
     });
   }
 
+  // Create Account
   handleCreateAccount(creds) {
     return createUser(creds.email, creds.password, (user) => {
       const uname = user.email.split('@')[0];
@@ -97,6 +100,7 @@ class Main extends Component {
     });
   }
 
+  // ~ Needs Work
   handleInvite(invitation) {
     console.log(this.state);
     console.log('invitation', invitation);
@@ -112,6 +116,7 @@ class Main extends Component {
       });
   }
 
+  // ~ Needs Work
   handleJoinNetworkNotAuth(joinInfo) {
     const {netId, invitationId, email, password} = joinInfo;
     console.log('joinInfo', joinInfo);
@@ -126,21 +131,6 @@ class Main extends Component {
       })
       .catch((err) => console.log('error', err))
       .then(() => console.log('continue'))
-
-    // const refPath = [netId, invitationId].join('\/');
-    //
-    // const userInvitations = refInvitations.child(refPath);
-    // console.log('userInvitations', userInvitations);
-
-    // if (!userInvitations) {
-    //   console.log('failed');
-    // } else {
-    //   console.log('success');
-    //   userInvitations
-    //     .
-    // }
-
-    // console.log('userInvitations', userInvitations);
   }
 
   handleLogOut() {
@@ -213,30 +203,45 @@ class Main extends Component {
       currentUserRef
         .once('value')
         .then((data) => {
-          const user = data.val();
-          console.log('current user', user);
+          const userInfo = data.val();
 
+          if (!userInfo) {
+            return;
+          }
+
+          const {email, uname, netId} = userInfo;
+          console.log('current user', userInfo);
+
+          if (!userInfo) {
+            return;
+          }
+          console.log('setting state');
           this.setState({
             uid: uid,
-            email: user.email,
+            email: email,
             uname: user.uname,
             netId: user.netId
           });
 
-          this.queryInvitations();
-
+          // this.queryInvitations();
         });
     });
   }
-
+  /* <PrivateRoute exact path="/dashboard" uid={this.state.uid} component={Dashboard}/> */
   render() {
     return (
       <Router>
         <div>
-          <AuthButton/>
+          { !!this.state.uid ? <button onClick={this.state.handleLogOut}>Logout</button> : '' }
 
           <Route exact path="/" {...this.state} render={(props) => {
-            return <App {...this.state} />
+            return !this.state.uid ?
+              <App {...this.state} />
+            :
+            <Redirect to={{
+              pathname: '/dashboard',
+              state: { from: props.location }
+            }}/>
           }} />
 
           <Route path="/network/:netId/:invitationId" render={
@@ -247,13 +252,25 @@ class Main extends Component {
             }
           />
 
-          <PrivateRoute path="/protected" component={Protected}/>
+          <Route path="/dashboard" render={
+              (props) => {
+                const routeProps = {...this.state, ...props};
+                return !!this.state.uid ?
+                  <Dashboard {...routeProps} />
+                :
+                  <Redirect to={{
+                    pathname: '/',
+                    state: { from: props.location }
+                  }}/>
+              }
+            }
+          />
+
         </div>
       </Router>
     );
   }
 }
-
 
 const fakeAuth = {
   isAuthenticated: false,
@@ -267,8 +284,8 @@ const fakeAuth = {
   }
 }
 
-const AuthButton = withRouter(({ history }) => (
-  fakeAuth.isAuthenticated ? (
+const AuthButton = withRouter(({ history, isAuth }) => (
+  isAuth ? (
     <p>
       Welcome! <button onClick={() => {
         fakeAuth.signout(() => history.push('/'))
@@ -282,7 +299,8 @@ const AuthButton = withRouter(({ history }) => (
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route {...rest} render={props => {
     const routeProps = {...rest, ...props};
-    return !!this.state.uid ? (
+    console.log('routeProps', routeProps);
+    return !!routeProps.uid ? (
       <Component {...routeProps} />
     ) : (
       <Redirect to={{

@@ -1,0 +1,83 @@
+-------------
+Pages
+-------------
+
+entry: /
+dashboard: /dashboard
+
+create account:  /create-account
+login: /login
+logout: /logout
+
+join network:  /join or /join/:netid
+
+claim gift card: /claim-gift-card
+get giver info:  /reveal-giver
+influencers: /top-influencers
+
+send gift card: /send-gift-card
+send gift: /send-gift
+send invitation: /invite
+pledge kindness :/kindness
+
+
+
+==========================
+Not Auth View (Options)
+=========================
+
+----------------------
+- Create Account
+- Sign In
+----------------------
+
+- Join ( Global Network )
+- Claim Gift Card *
+- Get Secret Giver Info *
+- See Top Influencers
+
+=======================================
+Auth View (Options) - Dashboard Page
+=======================================
+- Logout
+- If Auth Redirect To /dashboard
+
+Actions:
+--------------------
+- Send Invitation
+- Send Gift Card
+- Send Gift
+- Pledge Kindness
+- Complete Pledge
+
+You have received:
+--------------------
+- Receive Invitations
+- Receive Gift Card
+- Receive Gift Details
+
+Generous Progress:
+--------------------
+- Invitations Sent
+- Gift Cards Sent
+- Gifts Sent
+
+Info:
+--------------------
+- See Top Influencers
+
+======================================
+Join Network Invitation ( Not Auth)
+======================================
+
+You have received an invite
+Email:
+Password:
+[ Join Now ]
+
+======================================
+Join Network Invitation ( Auth)
+======================================
+
+You have received an invite
+[ Join Now ]

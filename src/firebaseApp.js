@@ -29,21 +29,26 @@ export const createUser = function(email, password, fnc = (user) => console.log(
     });
 };
 
+export const joinNetwork = ({}) => {
+
+};
+
+export const setInvitation = ({}) => {
+
+};
+
 export const logout = function() {
-  const isLoggedIn = firebase.auth().currentUser;
-  if (isLoggedIn) {
-    firebase.auth().signOut();
-  }
+  return firebase.auth().signOut();
 };
 
 export const setOnAuthChange = (fnc) => {
-  firebase
+  return firebase
     .auth()
     .onAuthStateChanged(fnc);
 };
 
 export const login = function(email, password, fnc = (user) => console.log(user)) {
-  firebase
+  return firebase
     .auth()
     .signInWithEmailAndPassword(email, password)
     .then(fnc)
