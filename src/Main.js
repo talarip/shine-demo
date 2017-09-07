@@ -234,7 +234,21 @@ class Main extends Component {
         <div>
           { !!this.state.uid ? <button onClick={this.state.handleLogOut}>Logout</button> : '' }
 
-          <Route exact path="/" {...this.state} render={(props) => {
+          <Route path="/dashboard" render={
+              (props) => {
+                const routeProps = {...this.state, ...props};
+                return !!this.state.uid ?
+                  <Dashboard {...routeProps} />
+                :
+                  <Redirect to={{
+                    pathname: '/',
+                    state: { from: props.location }
+                  }}/>
+              }
+            }
+          />
+
+          <Route path="/" {...this.state} render={(props) => {
             return !this.state.uid ?
               <App {...this.state} />
             :
@@ -248,20 +262,6 @@ class Main extends Component {
               (props) => {
                 const routeProps = {...this.state, ...props};
                 return <Network {...routeProps} />;
-              }
-            }
-          />
-
-          <Route path="/dashboard" render={
-              (props) => {
-                const routeProps = {...this.state, ...props};
-                return !!this.state.uid ?
-                  <Dashboard {...routeProps} />
-                :
-                  <Redirect to={{
-                    pathname: '/',
-                    state: { from: props.location }
-                  }}/>
               }
             }
           />
