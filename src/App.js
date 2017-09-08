@@ -18,19 +18,19 @@ const EntryPage = (props) => {
   );
 };
 
-const NetworkToJoin = (props) => {
-  return (
-    <div>
-      <h4>Join a Network!</h4>
-      <CreateAccount buttonText="Join Now" handleCreateAccount={props.handleCreateAccount}>
-        <div className="form-group">
-          <label htmlFor="networkId">Network Code</label>
-          <input type="text" className="form-control" id="networkId" name="networkId" placeholder="Optional" />
-        </div>
-      </CreateAccount>
-    </div>
-  )
-};
+// const NetworkToJoin = (props) => {
+//   return (
+//     <div>
+//       <h4>Join a Network!</h4>
+//       <CreateAccount buttonText="Join Now" handleCreateAccount={props.handleCreateAccount}>
+//         <div className="form-group">
+//           <label htmlFor="networkId">Network Code</label>
+//           <input type="text" className="form-control" id="networkId" name="networkId" placeholder="Optional" />
+//         </div>
+//       </CreateAccount>
+//     </div>
+//   )
+// };
 
 const GiftCardToClaim = (props) => {
   return (
@@ -73,7 +73,7 @@ class App extends Component {
 
         <div className="container">
           <Switch>
-            <Route path="/join" render={renderComponent(NetworkToJoin, this.props)} />
+
             <Route path="/claim-gift-card" render={renderComponent(GiftCardToClaim, this.props)} />
             <Route path="/reveal-giver" render={renderComponent(GiftGiver, this.props)} />
             <Route path="/top-influencers" render={renderComponent(TopInfluencers, this.props)} />

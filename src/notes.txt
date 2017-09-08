@@ -104,7 +104,7 @@ You have received an invite
         "gift_card_id_1": {},
         "gift_card_id_1": {}
       }
-      "user_acts_of_kidness" : {
+      "user_acts_of_kindness" : {
         "aok_id_1": {},
         "aok_id_2": {},
       },
@@ -143,7 +143,6 @@ You have received an invite
   "UserInvitations": {
     "invitation_id_1": {
       "to": lead_id_1,
-      "email": ''
       "accepted": "0",
       "timestamp": "UNIX_TIMESTAMP",
       "sent_by_uid" : "user_id_3"
@@ -167,7 +166,7 @@ You have received an invite
       "to": lead_id_3,
       "redeemed": "0",
       "fulfilled": "0",
-      "gift" : GIFT_ID,
+      "gift_card" : GIFT_CARD_ID,
       "allocated" : {
         "product_id_1" : $X,
         "product_id_2" : $X,
@@ -212,19 +211,67 @@ You have received an invite
       "referred_by_uid" : USER_ID,
       "type" : "GC", // UserInvitations or UserGiftCards or UserGifts
       "type_id" : "goat_id"
+    }.
+    "lead_id_3" : {
+      "email" : "test@email.com",
+      type"
     }
   },
 
   Gifts: {
-    id : goat
+    id_1 : {
+      name: Goat,
+      amount: $X,
+      woo_id: 4
+    },
+    id_2 : {
+      name: Badge,
+      amount: $X,
+      woo_id: 5
+    },
+  },
+
+  GiftsCards : {
+    id_1 : {
+      name: Gift Card 1,
+      amount: $X,
+      woo_id: 41,
+    },
+    id_2 : {
+      name: Gift Card 2,
+      amount: $X,
+      woo_id: 43,
+    },
+    id_3 : {...},
+    id_4 : {...},
   },
 
   ActsOfKindness : {
-
+    id_1 : {
+      name: Run,
+    },
+    id_2 : {
+      name: Eat,
+    },
+    id_3 : {
+      name: Sleep,
+    },
+    id_4 : {...},
+    id_5 : {...},
   },
 
   GiftCardAllocationProducts :{
-
+    product_id_1 : {
+      name: Water,
+    },
+    product_id_2 : {
+      name: Goat,
+    },
+    product_id_3 : {
+      name: Chicken,
+    },
+    product_id_4 : {},
+    product_id_5 : {}
   },
 
   MainScore : {
@@ -234,33 +281,41 @@ You have received an invite
 }
 
 
-Global
-Show Top 10 Networks
-OrderbyKey - Score
-firebase.database().ref('users/' + myUserId).orderByChild('score');
+RISKS:
 
-Join - Start a network:
+
+
+Fences:
+Save what you are showing
+Less traverse path to retrive the node\data
+
+Global
+Scenario: Show Top 10 Networks
+OrderbyKey - Score (or orderByValue)
+firebase.database().ref('users').child().orderByChild('score').Limttop(10);
+
+Scenario: Join - Start a network:
 Create the record in "Users"
 
-Join - Join an Existing Network
+Scenario: Join - Join an Existing Network
 IF Logged in - Search the record in the Users by User ID
 Else - Create the record in "Users"
 Create\Update the "UserParentNetworks" by the User ID
 Create\Update the "UserChildNetworks" by the Parent User ID
 
-Join - Join an Existing Network by Invitation
+Scenario: Join - Join an Existing Network by Invitation
 IF Logged in - Search the record in the Users by User ID
 Else - Create the record in "Users"
 Update the "UserInvitations" by invitation id to Accepted
 Create\Update the "UserParentNetworks" by the New User ID
 Create\Update the "UserChildNetworks" by the Parent User ID
 
-Received Gift
+Scenario: Received Gift
 Get the Gift details by gift_id from the UserGifts
 Enter Email to see the sender - Verify the receiver details
 Show the Sender Network  (1 Up 10 down)
 
-Received Gift Card
+Scenario: Received Gift Card
 Get the Gift Card details by gift_card_id from the UserGifts
 Enter Email to redeem - Verify the receiver details
 Allocate - Update the UserGiftCards by pushing the Allocations to the gift_card_id node
@@ -269,44 +324,46 @@ Update the UserGiftCards by updating the "redeemed" flag of the gift_card_id nod
 
 Logged in User Level
 
-Invite Others
+Scenario: Invite Others
 Create the record in the UserLeads by the Email
-Create the record in the UserInvitations by [Lead id] ??
+Create the record in the UserInvitations by Lead id
 Update the Users of the User record by adding the user_invitations - by invitation_id
-~ Show the Updated User Invitations
+Show the Updated User Invitations
 
-Pledge an Act
+Scenario: Pledge an Act
 Create the record in the UserActsOfKindness by User id
 Update the Users of the User record by adding the user_acts_of_kidness - by aok_id
 
-Give a Gift
+Scenario: Give a Gift
 Create the record in the UserLeads by the Name & Address
 Create the record in the UserGifts by Lead id
 Update the Users of the User record by adding the user_gifts - by gift_id
 Show the Updated User Gifts
 
-Give a Gift Card
+Scenario: Give a Gift Card
 Create the record in the UserLeads by the Email
 Create the record in the UserGiftCards by Lead id
 Update the Users of the User record by adding the user_gift_cards - by gift_card_id
 Show the Updated User Gifts Cards
 
-Show User Network
+Scenario: Show User Network
 1 Up
 10 Down
 
-Show User Invitations
+Scenario: Show User Invitations
 Get Records from the "UserInvitations" by the invitation_ids in the "User" Record
 
-Show User Impact - Gift Cards
+Scenario: Show User Impact - Gift Cards
 Get Records from the "UserGiftCards" by the gift_card_ids in the "User" Record
 
-Show User Impact - Gifts
+Scenario: Show User Impact - Gifts
 Get Records from the "UserGifts" by the gift_ids in the "User" Record
 
-Show User Impact - AOKs
+Scenario: Show User Impact - AOKs
 Get Records from the "UserActsOfKindness" by the aok_ids in the "User" Record
 
+
+Dev Notes:
 
 /**
  * Read the Key

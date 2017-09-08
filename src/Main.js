@@ -10,7 +10,7 @@ import {
 import { firebaseApp, login, setOnAuthChange, logout, createUser } from './firebaseApp';
 import { Database } from './Database';
 // import Invitation from './Invitation';
-import Network from './Network'
+import Network from './Network';
 import Dashboard from './Dashboard';
 const db = Database(firebaseApp);
 // const refUsers = db().ref('Users');
@@ -32,14 +32,15 @@ class Main extends Component {
       netId: null,
       invitations: [],
       sentInvitations: [],
+      invitationsInfo: {},
       isAuth: this.isAuth.bind(this),
       handleLogin: this.handleLogin.bind(this),
       handleCreateAccount: this.handleCreateAccount.bind(this),
       handleInvite: this.handleInvite.bind(this),
       handleLogOut: this.handleLogOut.bind(this),
-      handleJoinNetworkNotAuth: this.handleJoinNetworkNotAuth.bind(this),
-      queryInvitations: this.queryInvitations.bind(this),
-      renderInvitations: this.renderInvitations.bind(this),
+      handleJoinNetwork: this.handleJoinNetwork.bind(this),
+      handleJoinNetworkAuth: this.handleJoinNetworkAuth.bind(this),
+      getInvitationInfo: this.getInvitationInfo.bind(this),
       refreshInvitations: this.refreshInvitations.bind(this)
     };
   }
@@ -225,8 +226,51 @@ class Main extends Component {
       .then(() => history.push('/dashboard/invitations-sent'))
   }
 
+  getInvitationInfo(invitationId) {
+    console.log('invitationId', invitationId);
+
+    if (!invitationId) {
+      return;
+    }
+
+    return refInvitations
+      .child(invitationId)
+      .once('value')
+      .then((data) => {
+        const invitationInfo = data.val();
+        if (!invitationInfo) {
+          return null;
+        }
+
+        this.setState({
+          invitationsInfo: {...this.state.invitationsInfo,
+            [invitationId]: invitationInfo
+          }
+        });
+
+        // const { sent_by_uid } = invitationInfo;
+
+        // if (sent_by_uid) {
+        //   getDBRef('Users/' + sent_by_uid = '/uname')
+        //     .once('value')
+        //     .then((unameData) => {
+        //       console.log('unameData', unameData);
+        //       this.setState({
+        //         invitationsInfo: {...this.state.invitationsInfo,
+        //           [invitationId]: {...this.state.invitationsInfo[invitationId],
+        //             'fromName': unameData
+        //           }
+        //         }
+        //       })
+        //     });
+        // }
+      });
+
+
+  }
+
   // ~ Needs Work
-  handleJoinNetworkNotAuth(joinInfo) {
+  handleJoinNetwork(joinInfo) {
     // const {netId, invitationId, email, password} = joinInfo;
     // console.log('joinInfo', joinInfo);
 
@@ -242,6 +286,10 @@ class Main extends Component {
     //   .then(() => console.log('continue'))
   }
 
+  handleJoinNetworkAuth() {
+
+  }
+
   handleLogOut() {
     this.setState({
       uid: null,
@@ -250,54 +298,6 @@ class Main extends Component {
     });
 
     logout();
-  }
-
-  queryInvitations() {
-    // if (!this.state.netId) {
-    //   return '';
-    // }
-    //
-    // return refInvitations
-    //   .child(this.state.netId)
-    //   .once('value')
-    //   .then((data) => {
-    //     return data.val();
-    //   })
-    //   .then((invitations) => {
-    //     if (!invitations) {
-    //       return '';
-    //     }
-    //
-    //     const invitationsList = Object
-    //       .keys(invitations)
-    //       .map((key) => {
-    //         return {
-    //           'email': invitations[key].email,
-    //           'accepted': (invitations[key].accepted ? 'Accepted' : 'Pending')
-    //         };
-    //       });
-    //
-    //     this.setState({
-    //       invitations: invitationsList
-    //     })
-    //   })
-  }
-
-  renderInvitations() {
-    return null;
-    // if (!this.uid || !this.state.invitations || !this.state.invitations.length) {
-    //   return '';
-    // }
-    //
-    //
-    // return this
-    //   .state
-    //   .invitations
-    //   .map((invitation) => {
-    //     return (
-    //       <li>{invitation.email + '-' + invitation.accepted}</li>
-    //     );
-    //   })
   }
 
   componentDidMount() {
@@ -372,9 +372,10 @@ class Main extends Component {
                 }
               }
             />
-            <Route path="/network/:netId/:invitationId" render={
+            <Route exact path="/join/:invitationId" render={
                 (props) => {
                   const routeProps = {...this.state, ...props};
+                  console.log('isAuth', !!this.state.uid);
                   return <Network {...routeProps} />;
                 }
               }
