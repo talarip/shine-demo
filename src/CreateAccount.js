@@ -30,7 +30,8 @@ class CreateAccount extends Component {
             <label htmlFor="fullName">Full Name</label>
             <input type="text" className="form-control" id="fullName" name="fullName" placeholder="Full Name" />
           </div>
-          <button className="btn btn-primary" onClick={this.createAcct.bind(this)}>Get Started</button>
+          {this.props.children || null}
+          <button className="btn btn-primary" onClick={this.createAcct.bind(this)}>{this.props.buttonText || "Get Started"}</button>
         </form>
       </div>
     );

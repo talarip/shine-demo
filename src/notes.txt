@@ -1,6 +1,8 @@
 -------------
 Pages
 -------------
+https://stackoverflow.com/questions/42123261/programmatically-navigate-using-react-router-v4
+https://stackoverflow.com/questions/26019279/firebase-authentication-service-lookup-uid-from-email-without-login
 
 entry: /
 dashboard: /dashboard
@@ -82,10 +84,7 @@ Join Network Invitation ( Auth)
 You have received an invite
 [ Join Now ]
 
-
-
 ================================================================
-
 
 {
   "Users": {
@@ -144,6 +143,7 @@ You have received an invite
   "UserInvitations": {
     "invitation_id_1": {
       "to": lead_id_1,
+      "email": ''
       "accepted": "0",
       "timestamp": "UNIX_TIMESTAMP",
       "sent_by_uid" : "user_id_3"
@@ -231,4 +231,98 @@ You have received an invite
     for_inviting : 1,
     for_give_a_goat : 3
   }
+}
+
+
+Global
+Show Top 10 Networks
+OrderbyKey - Score
+firebase.database().ref('users/' + myUserId).orderByChild('score');
+
+Join - Start a network:
+Create the record in "Users"
+
+Join - Join an Existing Network
+IF Logged in - Search the record in the Users by User ID
+Else - Create the record in "Users"
+Create\Update the "UserParentNetworks" by the User ID
+Create\Update the "UserChildNetworks" by the Parent User ID
+
+Join - Join an Existing Network by Invitation
+IF Logged in - Search the record in the Users by User ID
+Else - Create the record in "Users"
+Update the "UserInvitations" by invitation id to Accepted
+Create\Update the "UserParentNetworks" by the New User ID
+Create\Update the "UserChildNetworks" by the Parent User ID
+
+Received Gift
+Get the Gift details by gift_id from the UserGifts
+Enter Email to see the sender - Verify the receiver details
+Show the Sender Network  (1 Up 10 down)
+
+Received Gift Card
+Get the Gift Card details by gift_card_id from the UserGifts
+Enter Email to redeem - Verify the receiver details
+Allocate - Update the UserGiftCards by pushing the Allocations to the gift_card_id node
+Update the UserGiftCards by updating the "redeemed" flag of the gift_card_id node
+
+
+Logged in User Level
+
+Invite Others
+Create the record in the UserLeads by the Email
+Create the record in the UserInvitations by [Lead id] ??
+Update the Users of the User record by adding the user_invitations - by invitation_id
+~ Show the Updated User Invitations
+
+Pledge an Act
+Create the record in the UserActsOfKindness by User id
+Update the Users of the User record by adding the user_acts_of_kidness - by aok_id
+
+Give a Gift
+Create the record in the UserLeads by the Name & Address
+Create the record in the UserGifts by Lead id
+Update the Users of the User record by adding the user_gifts - by gift_id
+Show the Updated User Gifts
+
+Give a Gift Card
+Create the record in the UserLeads by the Email
+Create the record in the UserGiftCards by Lead id
+Update the Users of the User record by adding the user_gift_cards - by gift_card_id
+Show the Updated User Gifts Cards
+
+Show User Network
+1 Up
+10 Down
+
+Show User Invitations
+Get Records from the "UserInvitations" by the invitation_ids in the "User" Record
+
+Show User Impact - Gift Cards
+Get Records from the "UserGiftCards" by the gift_card_ids in the "User" Record
+
+Show User Impact - Gifts
+Get Records from the "UserGifts" by the gift_ids in the "User" Record
+
+Show User Impact - AOKs
+Get Records from the "UserActsOfKindness" by the aok_ids in the "User" Record
+
+
+/**
+ * Read the Key
+ */
+writeUserData() {
+  var myRef = firebase.database().ref().push();
+  var key = myRef.key();
+
+  var newData={
+      id: key,
+      Website_Name: this.web_name.value,
+      Username: this.username.value,
+      Password : this.password.value,
+      website_link : this.web_link.value
+   }
+
+   myRef.push(newData);
+
 }

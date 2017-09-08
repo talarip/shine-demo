@@ -3,21 +3,24 @@ import App from './App';
 import {
   BrowserRouter as Router,
   Route,
-  Link,
+  Switch,
   Redirect,
-  withRouter
+  // withRouter
 } from 'react-router-dom';
 import { firebaseApp, login, setOnAuthChange, logout, createUser } from './firebaseApp';
 import { Database } from './Database';
-import Invitation from './Invitation';
+// import Invitation from './Invitation';
 import Network from './Network'
 import Dashboard from './Dashboard';
 const db = Database(firebaseApp);
-const refUsers = db().ref('Users');
+// const refUsers = db().ref('Users');
+const getDBRef = (refKey) => db().ref(refKey);
 // const refNetworks = db().ref('Networks');
-const refParentNetworks = db().ref('UserParentNetworks');
-const refChildNetworks = db().ref('UserChildNetworks');
+// const refParentNetworks = db().ref('UserParentNetworks');
+// const refChildNetworks = db().ref('UserChildNetworks');
 const refInvitations = db().ref('Invitations');
+const refUserLeads = db().ref('UserLeads');
+const NULL_VAL = '';
 
 class Main extends Component {
   constructor(props) {
@@ -28,33 +31,40 @@ class Main extends Component {
       uname: null,
       netId: null,
       invitations: [],
+      sentInvitations: [],
+      isAuth: this.isAuth.bind(this),
       handleLogin: this.handleLogin.bind(this),
       handleCreateAccount: this.handleCreateAccount.bind(this),
       handleInvite: this.handleInvite.bind(this),
       handleLogOut: this.handleLogOut.bind(this),
       handleJoinNetworkNotAuth: this.handleJoinNetworkNotAuth.bind(this),
       queryInvitations: this.queryInvitations.bind(this),
-      renderInvitations: this.renderInvitations.bind(this)
+      renderInvitations: this.renderInvitations.bind(this),
+      refreshInvitations: this.refreshInvitations.bind(this)
     };
+  }
+
+  isAuth() {
+    return !!this.state.uid;
   }
 
   // Login
   handleLogin(creds) {
-    console.log('creds', creds);
     login(creds.email, creds.password, (user) => {
       if (!user || !user.uid) {
         this.setState({uid: null});
         return;
       }
 
-      console.log('Retreiving User Info On Login');
+      console.log('Retreiving User Info On Login', user);
       const uid = user.uid;
       const currentUserRef = db().ref('Users/' + uid)
+
       currentUserRef
         .once('value')
         .then((data) => {
-          console.log('User Info Queried On Login', userInfo);
           const userInfo = data.val();
+          console.log('User Info Queried On Login', userInfo);
 
           if (!userInfo) {
             return;
@@ -85,55 +95,140 @@ class Main extends Component {
     return createUser(creds.email, creds.password, (user) => {
       const { fullName } = creds;
       const uname = user.email.split('@')[0];
+      const dbUsers = getDBRef('Users');
 
       console.log('Adding Node To Users', user);
-      const userInfoPromise = refUsers
+      const userInfoPromise = dbUsers
         .child(user.uid)
         .set({
+          'uid': user.uid,
           'email': user.email,
           'uname': uname,
           'fullName': fullName
+        })
+        .then(() => {
+          console.log('Setting User Info To State');
+          this.setState({
+            uid: user.uid,
+            email: user.email,
+            uname: uname,
+            fullName: fullName
+          });
         });
 
       // console.log('Adding Node To Parent Networks');
-      // const parentNetworks = refParentNetworks.push(user.uid);
+      // refParentNetworks.push(user.uid);
       //
       // console.log('Adding Node To Child Networks');
-      // const childNetworks = refChildNetworks.push(user.uid);
+      // refChildNetworks.push(user.uid);
 
       // Add Reference To State
-      console.log('Setting User Info To State');
-      this.setState({
-        uid: user.uid,
-        email: user.email,
-        uname: uname,
-        fullName: fullName
-      });
-
       return userInfoPromise
     });
   }
 
-  // ~ Needs Work
-  handleInvite(invitation) {
-    console.log(this.state);
-    console.log('invitation', invitation);
+  refreshInvitations() {
+    const uid = this.state.uid;
 
-    // const userInvitations = refInvitations.child(this.state.netId);
-    //
-    // userInvitations
-    //   .push({
-    //     email: invitation.email,
-    //     timestamp: (new Date()).toString(),
-    //     netId: this.state.netId,
-    //     accepted: 0
-    //   });
+    if (!uid) {
+      return;
+    }
+
+    return getDBRef('Users/' + uid)
+      .child('user_invitations')
+      .once('value')
+      .then((data) => {
+        const invitationsCollection = data.val();
+        console.log('invitationsCollection', invitationsCollection);
+
+        if (!invitationsCollection) {
+          // No Invitations To Show
+          return;
+        }
+
+        const invitationsToShow = Object
+          .keys(invitationsCollection)
+          .map((invitationRef) => {
+            return {
+              'id': invitationRef,
+              'url': '/join/' + invitationRef
+            };
+          });
+
+        console.log('invitationsToShow', invitationsToShow);
+        this.setState({
+          'sentInvitations': invitationsToShow
+        });
+      });
+  }
+
+  // ~ Needs Work
+  handleInvite(invitation, { history }) {
+    console.log('invitation', invitation);
+    const { uid } = this.state;
+    // Invite Others
+    // Create the record in the UserLeads by the Email
+    // Create the record in the UserInvitations by Lead id
+    // Update the Users of the User record by adding the user_invitations - by invitation_id
+    // Show the Updated User Invitations
+
+    // Create the record in the UserLeads by the Email
+    // Node Ref - UserLeads
+    // referred_by_uid - uid
+    // email - of lead
+    // name - ?? - What can have is it optional
+    // type - "Invitation"
+    // type_id - null
+    console.log('Creating User Lead');
+    const userLead = refUserLeads.push();
+    const userLeadId = userLead.key;
+    userLead
+      .set({
+        'referred_by_uid': uid,
+        'email': invitation.email,
+        'name': invitation.name || NULL_VAL,
+        'address': NULL_VAL,
+        'type': 'UI',
+        'type_id': NULL_VAL
+      });
+
+    // Create the record in the UserInvitations by Lead id
+    // Node Ref - UserInvitations
+    // invitation_id_1 - Created From Record Saved
+    // to - [lead_id_1] - from the UserLeads Record Created
+    // accepted - 0 - initial value
+    // timestamp - 0 - [Current Date]
+    // sent_by_uid - UID - user signed in creating the invitation
+    console.log('Creating User Invitation');
+    const userInvitation = refInvitations.push();
+    const userInvitationId = userInvitation.key;
+    userInvitation
+      .set({
+        'sent_by_uid': uid,
+        'email': invitation.email,
+        'to': userLeadId,
+        'lead_id': userLeadId,
+        'timestamp': (new Date()).toString(),
+        'accepted': 0
+      });
+
+
+    // Update the Users of the User record by adding the user_invitations - by invitation_id
+    // Node Ref - Users - user_invitations -
+    // Add invitation_id_1 Created From UserInvitations
+    console.log('Adding Invitation Reference To User');
+    const userDB = getDBRef('Users/' + uid);
+    userDB.child('user_invitations/' + userInvitationId).set(true);
+
+    this
+      .refreshInvitations()
+      .then(() => history.push('/dashboard/invitations-sent'))
   }
 
   // ~ Needs Work
   handleJoinNetworkNotAuth(joinInfo) {
-    const {netId, invitationId, email, password} = joinInfo;
-    console.log('joinInfo', joinInfo);
+    // const {netId, invitationId, email, password} = joinInfo;
+    // console.log('joinInfo', joinInfo);
 
     // KtJGOrUlqlT_sA_ShAl/KtJKzgmA_CI999WJo5f
 
@@ -151,8 +246,7 @@ class Main extends Component {
     this.setState({
       uid: null,
       email: null,
-      uname: null,
-      netId: null
+      uname: null
     });
 
     logout();
@@ -207,9 +301,20 @@ class Main extends Component {
   }
 
   componentDidMount() {
+    console.log('mount');
     setOnAuthChange((user) => {
       if (!user || !user.uid) {
         this.setState({uid: null});
+        return;
+      }
+
+      const hasInfo = this.state.email &&
+        this.state.uid &&
+        this.state.uname;
+
+      if (hasInfo) {
+        console.log('hasInfo', hasInfo);
+        // Cancel
         return;
       }
 
@@ -225,7 +330,7 @@ class Main extends Component {
             return;
           }
 
-          const {email, uname, fullname} = userInfo;
+          const {email, uname, fullname } = userInfo;
           console.log('User Info Retreived On Mount', userInfo);
 
           if (!userInfo) {
@@ -240,123 +345,55 @@ class Main extends Component {
             fullname
           });
 
-          // this.queryInvitations();
+          if (userInfo.user_invitations) {
+            this.refreshInvitations();
+          }
         });
     });
   }
-  /* <PrivateRoute exact path="/dashboard" uid={this.state.uid} component={Dashboard}/> */
+
   render() {
     return (
       <Router>
         <div>
           { !!this.state.uid ? <button onClick={this.state.handleLogOut}>Logout</button> : '' }
-
-          <Route path="/dashboard" render={
-              (props) => {
-                const routeProps = {...this.state, ...props};
-                return !!this.state.uid ?
-                  <Dashboard {...routeProps} />
-                :
-                  <Redirect to={{
-                    pathname: '/',
-                    state: { from: props.location }
-                  }}/>
+          <Switch>
+            <Route path="/dashboard" render={
+                (props) => {
+                  console.log('match /dashboard');
+                  const routeProps = {...this.state, ...props};
+                  return !!this.state.uid ?
+                    <Dashboard {...routeProps} />
+                  :
+                    <Redirect to={{
+                      pathname: '/',
+                      state: { from: props.location }
+                    }}/>
+                }
               }
-            }
-          />
-
-          <Route path="/" {...this.state} render={(props) => {
-            return !this.state.uid ?
-              <App {...this.state} />
-            :
-            <Redirect to={{
-              pathname: '/dashboard',
-              state: { from: props.location }
-            }}/>
-          }} />
-
-          <Route path="/network/:netId/:invitationId" render={
-              (props) => {
-                const routeProps = {...this.state, ...props};
-                return <Network {...routeProps} />;
+            />
+            <Route path="/network/:netId/:invitationId" render={
+                (props) => {
+                  const routeProps = {...this.state, ...props};
+                  return <Network {...routeProps} />;
+                }
               }
-            }
-          />
-
+            />
+            <Route path="/" {...this.state} render={(props) => {
+              console.log('match /');
+              console.log('isAuth', !!this.state.uid);
+              return !!this.state.uid ?
+                <Redirect to={{
+                  pathname: '/dashboard',
+                  state: { from: props.location }
+                }}/>
+              :
+                <App {...this.state} />
+            }} />
+          </Switch>
         </div>
       </Router>
     );
-  }
-}
-
-const fakeAuth = {
-  isAuthenticated: false,
-  authenticate(cb) {
-    this.isAuthenticated = true
-    setTimeout(cb, 100) // fake async
-  },
-  signout(cb) {
-    this.isAuthenticated = false
-    setTimeout(cb, 100)
-  }
-}
-
-const AuthButton = withRouter(({ history, isAuth }) => (
-  isAuth ? (
-    <p>
-      Welcome! <button onClick={() => {
-        fakeAuth.signout(() => history.push('/'))
-      }}>Sign out</button>
-    </p>
-  ) : (
-    <p>You are not logged in.</p>
-  )
-))
-
-const PrivateRoute = ({ component: Component, ...rest }) => (
-  <Route {...rest} render={props => {
-    const routeProps = {...rest, ...props};
-    console.log('routeProps', routeProps);
-    return !!routeProps.uid ? (
-      <Component {...routeProps} />
-    ) : (
-      <Redirect to={{
-        pathname: '/',
-        state: { from: props.location }
-      }}/>
-    )
-  }}/>
-)
-
-const Protected = () => <h3>Protected</h3>;
-
-class LoginExample extends React.Component {
-  state = {
-    redirectToReferrer: false
-  }
-
-  login = () => {
-    fakeAuth.authenticate(() => {
-      this.setState({ redirectToReferrer: true })
-    })
-  }
-
-  render() {
-    const { from } = this.props.location.state || { from: { pathname: '/' } }
-    const { redirectToReferrer } = this.state
-
-    if (redirectToReferrer) {
-      return (
-        <Redirect to={from}/>
-      )
-    }
-
-    return (
-      <div>
-        <p>You must log in to view the page at {from.pathname}</p>
-        <button onClick={this.login}>Log in</button>
-      </div>
-    )
   }
 }
 

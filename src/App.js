@@ -1,37 +1,14 @@
 import React, { Component } from 'react';
 import './App.css';
 import {
-  BrowserRouter as Router,
   Route,
   Link,
-  Redirect,
-  Switch,
-  withRouter
+  Switch
 } from 'react-router-dom';
 import Login from './Login';
 import CreateAccount from './CreateAccount';
 
-const Invitations = (props) => {
-  console.log('invitations props', props);
-  if (!props.uid || !props.invitations || !props.invitations.length) {
-    return null;
-  }
-
-  return (
-    <div>
-      <h4>Invitations</h4>
-      <ul>
-        {props.invitations.map(
-          (invitation, index) =>
-            <li key={index}>{invitation.email + ' - ' + invitation.accepted}</li>
-        )}
-      </ul>
-    </div>
-  );
-};
-
 const EntryPage = (props) => {
-  console.log('EntryPageProps', props);
   return (
     <div>
       <CreateAccount handleCreateAccount={props.handleCreateAccount} />
@@ -41,11 +18,16 @@ const EntryPage = (props) => {
   );
 };
 
-
 const NetworkToJoin = (props) => {
   return (
     <div>
-      Join a Network!
+      <h4>Join a Network!</h4>
+      <CreateAccount buttonText="Join Now" handleCreateAccount={props.handleCreateAccount}>
+        <div className="form-group">
+          <label htmlFor="networkId">Network Code</label>
+          <input type="text" className="form-control" id="networkId" name="networkId" placeholder="Optional" />
+        </div>
+      </CreateAccount>
     </div>
   )
 };
@@ -74,8 +56,11 @@ const TopInfluencers = (props) => {
   )
 };
 
-const renderComponent = (RenderComponent, props) => {
-  return () => (<RenderComponent {...props} />);
+const renderComponent = (RenderComponent, props = {}, excludeRouteProps = false) => {
+  return (routeProps) => {
+    const renderProps = excludeRouteProps ? props : {...props, ...routeProps};
+    return <RenderComponent {...renderProps} />
+  };
 };
 
 class App extends Component {
