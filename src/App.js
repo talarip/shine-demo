@@ -31,6 +31,7 @@ const Invitations = (props) => {
 };
 
 const EntryPage = (props) => {
+  console.log('EntryPageProps', props);
   return (
     <div>
       <CreateAccount handleCreateAccount={props.handleCreateAccount} />
@@ -73,6 +74,10 @@ const TopInfluencers = (props) => {
   )
 };
 
+const renderComponent = (RenderComponent, props) => {
+  return () => (<RenderComponent {...props} />);
+};
+
 class App extends Component {
   render() {
     return (
@@ -83,13 +88,13 @@ class App extends Component {
 
         <div className="container">
           <Switch>
-            <Route {...this.props} path="/join"  component={NetworkToJoin} />
-            <Route {...this.props} path="/claim-gift-card"  component={GiftCardToClaim} />
-            <Route {...this.props} path="/reveal-giver"  component={GiftGiver} />
-            <Route {...this.props} path="/top-influencers"  component={TopInfluencers} />
-            <Route {...this.props} path="/login"  component={Login} />
-            <Route {...this.props} path="/create-account"  component={CreateAccount} />
-            <Route {...this.props} component={EntryPage}/>
+            <Route path="/join" render={renderComponent(NetworkToJoin, this.props)} />
+            <Route path="/claim-gift-card" render={renderComponent(GiftCardToClaim, this.props)} />
+            <Route path="/reveal-giver" render={renderComponent(GiftGiver, this.props)} />
+            <Route path="/top-influencers" render={renderComponent(TopInfluencers, this.props)} />
+            <Route path="/login" render={renderComponent(Login, this.props)} />
+            <Route path="/create-account"  render={renderComponent(CreateAccount, this.props)} />
+            <Route render={renderComponent(EntryPage, this.props)}/>
           </Switch>
 
           <hr />

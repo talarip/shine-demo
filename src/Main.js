@@ -14,7 +14,9 @@ import Network from './Network'
 import Dashboard from './Dashboard';
 const db = Database(firebaseApp);
 const refUsers = db().ref('Users');
-const refNetworks = db().ref('Networks');
+// const refNetworks = db().ref('Networks');
+const refParentNetworks = db().ref('UserParentNetworks');
+const refChildNetworks = db().ref('UserChildNetworks');
 const refInvitations = db().ref('Invitations');
 
 class Main extends Component {
@@ -40,22 +42,40 @@ class Main extends Component {
   handleLogin(creds) {
     console.log('creds', creds);
     login(creds.email, creds.password, (user) => {
+      if (!user || !user.uid) {
+        this.setState({uid: null});
+        return;
+      }
+
+      console.log('Retreiving User Info On Login');
       const uid = user.uid;
       const currentUserRef = db().ref('Users/' + uid)
       currentUserRef
         .once('value')
         .then((data) => {
-          const user = data.val();
-          console.log('current user', user);
+          console.log('User Info Queried On Login', userInfo);
+          const userInfo = data.val();
 
+          if (!userInfo) {
+            return;
+          }
+
+          const {email, uname, fullname} = userInfo;
+          console.log('User Info Retreived On Login', userInfo);
+
+          if (!userInfo) {
+            return;
+          }
+
+          console.log('Setting User Info To State', userInfo);
           this.setState({
-            uid: uid,
-            email: user.email,
-            uname: user.uname,
-            netId: user.netId
+            uid,
+            email,
+            uname,
+            fullname
           });
 
-          this.queryInvitations();
+          // this.queryInvitations();
         });
     });
   }
@@ -63,40 +83,34 @@ class Main extends Component {
   // Create Account
   handleCreateAccount(creds) {
     return createUser(creds.email, creds.password, (user) => {
+      const { fullName } = creds;
       const uname = user.email.split('@')[0];
 
-      console.log('adding user', user);
-      const userNetwork = refNetworks
-        .push({
-          uid: user.uid
-        });
-
-      userNetwork
-        .child('members')
+      console.log('Adding Node To Users', user);
+      const userInfoPromise = refUsers
+        .child(user.uid)
         .set({
-          [user.uid]: user.email
+          'email': user.email,
+          'uname': uname,
+          'fullName': fullName
         });
 
-      const userInfo = refUsers.child(user.uid);
+      // console.log('Adding Node To Parent Networks');
+      // const parentNetworks = refParentNetworks.push(user.uid);
+      //
+      // console.log('Adding Node To Child Networks');
+      // const childNetworks = refChildNetworks.push(user.uid);
 
+      // Add Reference To State
+      console.log('Setting User Info To State');
       this.setState({
         uid: user.uid,
         email: user.email,
         uname: uname,
-        netId: userNetwork.key,
-        invitations: []
+        fullName: fullName
       });
 
-
-      userInfo
-        .set({
-          email: user.email,
-          uname: user.email.split('@')[0],
-          netId: userNetwork.key,
-          myNetwork: {
-            [userNetwork.key]: userNetwork.key
-          }
-        });
+      return userInfoPromise
     });
   }
 
@@ -105,15 +119,15 @@ class Main extends Component {
     console.log(this.state);
     console.log('invitation', invitation);
 
-    const userInvitations = refInvitations.child(this.state.netId);
-
-    userInvitations
-      .push({
-        email: invitation.email,
-        timestamp: (new Date()).toString(),
-        netId: this.state.netId,
-        accepted: 0
-      });
+    // const userInvitations = refInvitations.child(this.state.netId);
+    //
+    // userInvitations
+    //   .push({
+    //     email: invitation.email,
+    //     timestamp: (new Date()).toString(),
+    //     netId: this.state.netId,
+    //     accepted: 0
+    //   });
   }
 
   // ~ Needs Work
@@ -123,14 +137,14 @@ class Main extends Component {
 
     // KtJGOrUlqlT_sA_ShAl/KtJKzgmA_CI999WJo5f
 
-    // First Attempt To Create User Account
-    this
-      .handleCreateAccount({email, password})
-      .then(() => {
-        console.log('isPromise', true);
-      })
-      .catch((err) => console.log('error', err))
-      .then(() => console.log('continue'))
+    // // First Attempt To Create User Account
+    // this
+    //   .handleCreateAccount({email, password})
+    //   .then(() => {
+    //     console.log('isPromise', true);
+    //   })
+    //   .catch((err) => console.log('error', err))
+    //   .then(() => console.log('continue'))
   }
 
   handleLogOut() {
@@ -145,50 +159,51 @@ class Main extends Component {
   }
 
   queryInvitations() {
-    if (!this.state.netId) {
-      return '';
-    }
-
-    return refInvitations
-      .child(this.state.netId)
-      .once('value')
-      .then((data) => {
-        return data.val();
-      })
-      .then((invitations) => {
-        if (!invitations) {
-          return '';
-        }
-
-        const invitationsList = Object
-          .keys(invitations)
-          .map((key) => {
-            return {
-              'email': invitations[key].email,
-              'accepted': (invitations[key].accepted ? 'Accepted' : 'Pending')
-            };
-          });
-
-        this.setState({
-          invitations: invitationsList
-        })
-      })
+    // if (!this.state.netId) {
+    //   return '';
+    // }
+    //
+    // return refInvitations
+    //   .child(this.state.netId)
+    //   .once('value')
+    //   .then((data) => {
+    //     return data.val();
+    //   })
+    //   .then((invitations) => {
+    //     if (!invitations) {
+    //       return '';
+    //     }
+    //
+    //     const invitationsList = Object
+    //       .keys(invitations)
+    //       .map((key) => {
+    //         return {
+    //           'email': invitations[key].email,
+    //           'accepted': (invitations[key].accepted ? 'Accepted' : 'Pending')
+    //         };
+    //       });
+    //
+    //     this.setState({
+    //       invitations: invitationsList
+    //     })
+    //   })
   }
 
   renderInvitations() {
-    if (!this.uid || !this.state.invitations || !this.state.invitations.length) {
-      return '';
-    }
-
-
-    return this
-      .state
-      .invitations
-      .map((invitation) => {
-        return (
-          <li>{invitation.email + '-' + invitation.accepted}</li>
-        );
-      })
+    return null;
+    // if (!this.uid || !this.state.invitations || !this.state.invitations.length) {
+    //   return '';
+    // }
+    //
+    //
+    // return this
+    //   .state
+    //   .invitations
+    //   .map((invitation) => {
+    //     return (
+    //       <li>{invitation.email + '-' + invitation.accepted}</li>
+    //     );
+    //   })
   }
 
   componentDidMount() {
@@ -198,6 +213,7 @@ class Main extends Component {
         return;
       }
 
+      console.log('Retreiving User Info On Mount');
       const uid = user.uid;
       const currentUserRef = db().ref('Users/' + uid)
       currentUserRef
@@ -209,18 +225,19 @@ class Main extends Component {
             return;
           }
 
-          const {email, uname, netId} = userInfo;
-          console.log('current user', userInfo);
+          const {email, uname, fullname} = userInfo;
+          console.log('User Info Retreived On Mount', userInfo);
 
           if (!userInfo) {
             return;
           }
-          console.log('setting state');
+
+          console.log('Setting User Info To State', userInfo);
           this.setState({
-            uid: uid,
-            email: email,
-            uname: user.uname,
-            netId: user.netId
+            uid,
+            email,
+            uname,
+            fullname
           });
 
           // this.queryInvitations();

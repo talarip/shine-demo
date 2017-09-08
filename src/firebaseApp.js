@@ -17,7 +17,7 @@ export const isAuth = function() {
 };
 
 export const createUser = function(email, password, fnc = (user) => console.log('user created', user)) {
-  return firebase
+  firebase
     .auth()
     .createUserWithEmailAndPassword(email, password)
     .then(fnc)

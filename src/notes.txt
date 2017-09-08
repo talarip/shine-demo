@@ -81,3 +81,154 @@ Join Network Invitation ( Auth)
 
 You have received an invite
 [ Join Now ]
+
+
+
+================================================================
+
+
+{
+  "Users": {
+    "user_id_1": {
+      "email": "one@email.com",
+      "uname": "one",
+      "full_name": "One Last",
+      "user_invitations": {
+        "invitation_id_1": {},
+        "invitation_id_2": {}
+      },
+      "user_gifts": {
+        "gift_id_1": {},
+        "gift_id_1": {}
+      },
+      "user_gift_cards": {
+        "gift_card_id_1": {},
+        "gift_card_id_1": {}
+      }
+      "user_acts_of_kidness" : {
+        "aok_id_1": {},
+        "aok_id_2": {},
+      },
+      "score" : X,
+    },
+    "user_id_2": {...},
+    "user_id_3": {...},
+    "user_id_4": {...},
+    "user_id_5": {...}
+  },
+
+  "UserParentNetworks" : {
+    "user_id_3": {
+      "user_id_2": "two@email.com",
+      "user_id_1": "one@email.com"
+    },
+    "user_id_4": {...},
+    "user_id_5": {...}
+  }
+
+  "UserChildNetworks": {
+    "user_id_1": {
+      "user_id_2": "two@email.com",
+      "user_id_3": "three@email.com"
+    },
+    "user_id_2": {
+      "user_id_4": "two@email.com",
+      "user_id_3": "three@email.com",
+      "user_id_5": "five@email.com"
+    },
+    "user_id_3": {...},
+    "user_id_4": {...},
+    "user_id_5": {...}
+  },
+
+  "UserInvitations": {
+    "invitation_id_1": {
+      "to": lead_id_1,
+      "accepted": "0",
+      "timestamp": "UNIX_TIMESTAMP",
+      "sent_by_uid" : "user_id_3"
+    },
+    "invitation_id_2": {
+      "to": lead_id_3,
+      "accepted": "0",
+      "timestamp": "UNIX_TIMESTAMP",
+      "sent_by_uid" : "user_id_4"
+    },
+    "invitation_id_3": {
+      "to": lead_id_5,
+      "accepted": "0",
+      "timestamp": "UNIX_TIMESTAMP",
+      "sent_by_uid" : "user_id_4"
+    }
+  },
+
+  "UserGiftCards": {
+    "gift_card_id_1": {
+      "to": lead_id_3,
+      "redeemed": "0",
+      "fulfilled": "0",
+      "gift" : GIFT_ID,
+      "allocated" : {
+        "product_id_1" : $X,
+        "product_id_2" : $X,
+        "product_id_3" : $X,
+      }
+      "timestamp": "UNIX_TIMESTAMP",
+      "referred_by_uid" : USER_ID,
+    },
+    "gift_card_id_2": {...},
+    "gift_card_id_3": {...}
+  },
+
+  "UserGifts": {
+    "gift_id_1": {
+      "to" : lead_id_1
+      "redeemed": "0",
+      "fulfilled": "0",
+      "gift" : GIFT_ID,
+      "timestamp": "UNIX_TIMESTAMP",
+      "sent_by_uid" : USER_ID
+    },
+    "gift_id_2": {...},
+    "gift_id_3": {...}
+  },
+
+  "UserActsOfKindness": {
+    "aok_id_1": {
+      "act": "ACT ID",
+      "completed": "0",
+      "timestamp": "UNIX_TIMESTAMP",
+      "pledged_by_uid" : USER_ID
+    },
+    "aok_id_2": {...},
+    "aok_id_3": {...}
+  },
+
+  UserLeads : {
+    "lead_id_1" : {
+      "name" : "",
+      "email" : "",
+      "address" : "",
+      "referred_by_uid" : USER_ID,
+      "type" : "GC", // UserInvitations or UserGiftCards or UserGifts
+      "type_id" : "goat_id"
+    }
+  },
+
+  Gifts: {
+    id : goat
+  },
+
+  ActsOfKindness : {
+
+  },
+
+  GiftCardAllocationProducts :{
+
+  },
+
+  MainScore : {
+    for_inviting : 1,
+    for_give_a_goat : 3
+  }
+}
