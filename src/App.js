@@ -1,34 +1,12 @@
 import React, { Component } from 'react';
 import './App.css';
 import {
-  BrowserRouter as Router,
   Route,
   Link,
-  Redirect,
-  Switch,
-  withRouter
+  Switch
 } from 'react-router-dom';
 import Login from './Login';
 import CreateAccount from './CreateAccount';
-
-const Invitations = (props) => {
-  console.log('invitations props', props);
-  if (!props.uid || !props.invitations || !props.invitations.length) {
-    return null;
-  }
-
-  return (
-    <div>
-      <h4>Invitations</h4>
-      <ul>
-        {props.invitations.map(
-          (invitation, index) =>
-            <li key={index}>{invitation.email + ' - ' + invitation.accepted}</li>
-        )}
-      </ul>
-    </div>
-  );
-};
 
 const EntryPage = (props) => {
   return (
@@ -40,14 +18,19 @@ const EntryPage = (props) => {
   );
 };
 
-
-const NetworkToJoin = (props) => {
-  return (
-    <div>
-      Join a Network!
-    </div>
-  )
-};
+// const NetworkToJoin = (props) => {
+//   return (
+//     <div>
+//       <h4>Join a Network!</h4>
+//       <CreateAccount buttonText="Join Now" handleCreateAccount={props.handleCreateAccount}>
+//         <div className="form-group">
+//           <label htmlFor="networkId">Network Code</label>
+//           <input type="text" className="form-control" id="networkId" name="networkId" placeholder="Optional" />
+//         </div>
+//       </CreateAccount>
+//     </div>
+//   )
+// };
 
 const GiftCardToClaim = (props) => {
   return (
@@ -73,6 +56,13 @@ const TopInfluencers = (props) => {
   )
 };
 
+const renderComponent = (RenderComponent, props = {}, excludeRouteProps = false) => {
+  return (routeProps) => {
+    const renderProps = excludeRouteProps ? props : {...props, ...routeProps};
+    return <RenderComponent {...renderProps} />
+  };
+};
+
 class App extends Component {
   render() {
     return (
@@ -83,13 +73,13 @@ class App extends Component {
 
         <div className="container">
           <Switch>
-            <Route {...this.props} path="/join"  component={NetworkToJoin} />
-            <Route {...this.props} path="/claim-gift-card"  component={GiftCardToClaim} />
-            <Route {...this.props} path="/reveal-giver"  component={GiftGiver} />
-            <Route {...this.props} path="/top-influencers"  component={TopInfluencers} />
-            <Route {...this.props} path="/login"  component={Login} />
-            <Route {...this.props} path="/create-account"  component={CreateAccount} />
-            <Route {...this.props} component={EntryPage}/>
+
+            <Route path="/claim-gift-card" render={renderComponent(GiftCardToClaim, this.props)} />
+            <Route path="/reveal-giver" render={renderComponent(GiftGiver, this.props)} />
+            <Route path="/top-influencers" render={renderComponent(TopInfluencers, this.props)} />
+            <Route path="/login" render={renderComponent(Login, this.props)} />
+            <Route path="/create-account"  render={renderComponent(CreateAccount, this.props)} />
+            <Route render={renderComponent(EntryPage, this.props)}/>
           </Switch>
 
           <hr />

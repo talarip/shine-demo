@@ -1,42 +1,38 @@
 import React, { Component } from 'react';
 import './App.css';
 import {
-  BrowserRouter as Router,
   Switch,
   Route,
   Link,
-  Redirect,
-  withRouter
 } from 'react-router-dom';
-// import Invitation from './Invitation';
+import Invitation from './Invitation';
 
 
-const Invitations = (props) => {
-  console.log('invitations props', props);
-  if (!props.uid || !props.invitations || !props.invitations.length) {
-    return null;
-  }
+// const Invitations = (props) => {
+//   console.log('invitations props', props);
+//   if (!props.uid || !props.invitations || !props.invitations.length) {
+//     return null;
+//   }
+//
+//   return (
+//     <div>
+//       <h4>Invitations</h4>
+//       <ul>
+//         {props.invitations.map(
+//           (invitation, index) =>
+//             <li key={index}>{invitation.email + ' - ' + invitation.accepted}</li>
+//         )}
+//       </ul>
+//     </div>
+//   );
+// };
 
-  return (
-    <div>
-      <h4>Invitations</h4>
-      <ul>
-        {props.invitations.map(
-          (invitation, index) =>
-            <li key={index}>{invitation.email + ' - ' + invitation.accepted}</li>
-        )}
-      </ul>
-    </div>
-  );
-};
-
-const Invitation = (props) => {
-  return (
-    <div>
-      Send Invitations
-    </div>
-  )
-};
+// const Invitation = (props) => {
+//   return (
+//       <Invitation />
+//     </div>
+//   )
+// };
 
 const GiftCardSender = (props) => {
   return (
@@ -87,11 +83,26 @@ const ReceivedGifts = (props) => {
 };
 
 const SentInvitations = (props) => {
+  console.log('SentInvitatonsProps', props);
+  const sentInvitations = props.sentInvitations;
+  if (!sentInvitations || !sentInvitations.length) {
+    return (
+      <div>
+        <h4>Invitations Sent</h4>
+        <p>No Invitations Have Been Sent</p>
+        <Link to="/dashboard/invite"><button>Invite Someone</button></Link>
+      </div>
+    );
+  }
+
   return (
     <div>
-      Sent Invitations
+      <h4>Invitations Sent</h4>
+      <ul>
+        {sentInvitations.map((invitation, key) => <li key={key}><a href={invitation.url}>{invitation.id}</a></li>)}
+      </ul>
     </div>
-  )
+  );
 };
 
 const SentGiftCards = (props) => {
@@ -118,6 +129,13 @@ const DashboardDefault = (props) => {
   )
 };
 
+const renderComponent = (RenderComponent, props = {}, excludeRouteProps = false) => {
+  return (routeProps) => {
+    const renderProps = excludeRouteProps ? props : {...props, ...routeProps};
+    return <RenderComponent {...renderProps} />
+  };
+};
+
 
 class Dashboard extends Component {
   render() {
@@ -129,14 +147,14 @@ class Dashboard extends Component {
 
         <div className="container">
           <Switch>
-            <Route path="/dashboard/invite"  component={Invitation} />
+            <Route path="/dashboard/invite"  render={renderComponent(Invitation, this.props)} />
             <Route path="/dashboard/send-gift-card"  component={GiftCardSender} />
             <Route path="/dashboard/send-gift"  component={GiftSender} />
             <Route path="/dashboard/kindness"  component={Kindness} />
             <Route path="/dashboard/view-invitation"  component={ReceiedInvitations} />
             <Route exact path="/dashboard/view-gift-cards"  component={ReceiedGiftCards} />
             <Route exact path="/dashboard/view-gift-cards"  component={ReceivedGifts} />
-            <Route exact path="/dashboard/invitations-sent"  component={SentInvitations} />
+            <Route exact path="/dashboard/invitations-sent"  render={renderComponent(SentInvitations, this.props)} />
             <Route exact path="/dashboard/gift-cards-sent"  component={SentGiftCards} />
             <Route exact path="/dashboard/gift-sent"  component={SentGifts} />
             <Route component={DashboardDefault}/>

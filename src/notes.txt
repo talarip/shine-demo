@@ -1,6 +1,8 @@
 -------------
 Pages
 -------------
+https://stackoverflow.com/questions/42123261/programmatically-navigate-using-react-router-v4
+https://stackoverflow.com/questions/26019279/firebase-authentication-service-lookup-uid-from-email-without-login
 
 entry: /
 dashboard: /dashboard
@@ -81,3 +83,303 @@ Join Network Invitation ( Auth)
 
 You have received an invite
 [ Join Now ]
+
+================================================================
+
+{
+  "Users": {
+    "user_id_1": {
+      "email": "one@email.com",
+      "uname": "one",
+      "full_name": "One Last",
+      "user_invitations": {
+        "invitation_id_1": {},
+        "invitation_id_2": {}
+      },
+      "user_gifts": {
+        "gift_id_1": {},
+        "gift_id_1": {}
+      },
+      "user_gift_cards": {
+        "gift_card_id_1": {},
+        "gift_card_id_1": {}
+      }
+      "user_acts_of_kindness" : {
+        "aok_id_1": {},
+        "aok_id_2": {},
+      },
+      "score" : X,
+    },
+    "user_id_2": {...},
+    "user_id_3": {...},
+    "user_id_4": {...},
+    "user_id_5": {...}
+  },
+
+  "UserParentNetworks" : {
+    "user_id_3": {
+      "user_id_2": "two@email.com",
+      "user_id_1": "one@email.com"
+    },
+    "user_id_4": {...},
+    "user_id_5": {...}
+  }
+
+  "UserChildNetworks": {
+    "user_id_1": {
+      "user_id_2": "two@email.com",
+      "user_id_3": "three@email.com"
+    },
+    "user_id_2": {
+      "user_id_4": "two@email.com",
+      "user_id_3": "three@email.com",
+      "user_id_5": "five@email.com"
+    },
+    "user_id_3": {...},
+    "user_id_4": {...},
+    "user_id_5": {...}
+  },
+
+  "UserInvitations": {
+    "invitation_id_1": {
+      "to": lead_id_1,
+      "accepted": "0",
+      "timestamp": "UNIX_TIMESTAMP",
+      "sent_by_uid" : "user_id_3"
+    },
+    "invitation_id_2": {
+      "to": lead_id_3,
+      "accepted": "0",
+      "timestamp": "UNIX_TIMESTAMP",
+      "sent_by_uid" : "user_id_4"
+    },
+    "invitation_id_3": {
+      "to": lead_id_5,
+      "accepted": "0",
+      "timestamp": "UNIX_TIMESTAMP",
+      "sent_by_uid" : "user_id_4"
+    }
+  },
+
+  "UserGiftCards": {
+    "gift_card_id_1": {
+      "to": lead_id_3,
+      "redeemed": "0",
+      "fulfilled": "0",
+      "gift_card" : GIFT_CARD_ID,
+      "allocated" : {
+        "product_id_1" : $X,
+        "product_id_2" : $X,
+        "product_id_3" : $X,
+      }
+      "timestamp": "UNIX_TIMESTAMP",
+      "referred_by_uid" : USER_ID,
+    },
+    "gift_card_id_2": {...},
+    "gift_card_id_3": {...}
+  },
+
+  "UserGifts": {
+    "gift_id_1": {
+      "to" : lead_id_1
+      "redeemed": "0",
+      "fulfilled": "0",
+      "gift" : GIFT_ID,
+      "timestamp": "UNIX_TIMESTAMP",
+      "sent_by_uid" : USER_ID
+    },
+    "gift_id_2": {...},
+    "gift_id_3": {...}
+  },
+
+  "UserActsOfKindness": {
+    "aok_id_1": {
+      "act": "ACT ID",
+      "completed": "0",
+      "timestamp": "UNIX_TIMESTAMP",
+      "pledged_by_uid" : USER_ID
+    },
+    "aok_id_2": {...},
+    "aok_id_3": {...}
+  },
+
+  UserLeads : {
+    "lead_id_1" : {
+      "name" : "",
+      "email" : "",
+      "address" : "",
+      "referred_by_uid" : USER_ID,
+      "type" : "GC", // UserInvitations or UserGiftCards or UserGifts
+      "type_id" : "goat_id"
+    }.
+    "lead_id_3" : {
+      "email" : "test@email.com",
+      type"
+    }
+  },
+
+  Gifts: {
+    id_1 : {
+      name: Goat,
+      amount: $X,
+      woo_id: 4
+    },
+    id_2 : {
+      name: Badge,
+      amount: $X,
+      woo_id: 5
+    },
+  },
+
+  GiftsCards : {
+    id_1 : {
+      name: Gift Card 1,
+      amount: $X,
+      woo_id: 41,
+    },
+    id_2 : {
+      name: Gift Card 2,
+      amount: $X,
+      woo_id: 43,
+    },
+    id_3 : {...},
+    id_4 : {...},
+  },
+
+  ActsOfKindness : {
+    id_1 : {
+      name: Run,
+    },
+    id_2 : {
+      name: Eat,
+    },
+    id_3 : {
+      name: Sleep,
+    },
+    id_4 : {...},
+    id_5 : {...},
+  },
+
+  GiftCardAllocationProducts :{
+    product_id_1 : {
+      name: Water,
+    },
+    product_id_2 : {
+      name: Goat,
+    },
+    product_id_3 : {
+      name: Chicken,
+    },
+    product_id_4 : {},
+    product_id_5 : {}
+  },
+
+  MainScore : {
+    for_inviting : 1,
+    for_give_a_goat : 3
+  }
+}
+
+
+RISKS:
+
+
+
+Fences:
+Save what you are showing
+Less traverse path to retrive the node\data
+
+Global
+Scenario: Show Top 10 Networks
+OrderbyKey - Score (or orderByValue)
+firebase.database().ref('users').child().orderByChild('score').Limttop(10);
+
+Scenario: Join - Start a network:
+Create the record in "Users"
+
+Scenario: Join - Join an Existing Network
+IF Logged in - Search the record in the Users by User ID
+Else - Create the record in "Users"
+Create\Update the "UserParentNetworks" by the User ID
+Create\Update the "UserChildNetworks" by the Parent User ID
+
+Scenario: Join - Join an Existing Network by Invitation
+IF Logged in - Search the record in the Users by User ID
+Else - Create the record in "Users"
+Update the "UserInvitations" by invitation id to Accepted
+Create\Update the "UserParentNetworks" by the New User ID
+Create\Update the "UserChildNetworks" by the Parent User ID
+
+Scenario: Received Gift
+Get the Gift details by gift_id from the UserGifts
+Enter Email to see the sender - Verify the receiver details
+Show the Sender Network  (1 Up 10 down)
+
+Scenario: Received Gift Card
+Get the Gift Card details by gift_card_id from the UserGifts
+Enter Email to redeem - Verify the receiver details
+Allocate - Update the UserGiftCards by pushing the Allocations to the gift_card_id node
+Update the UserGiftCards by updating the "redeemed" flag of the gift_card_id node
+
+
+Logged in User Level
+
+Scenario: Invite Others
+Create the record in the UserLeads by the Email
+Create the record in the UserInvitations by Lead id
+Update the Users of the User record by adding the user_invitations - by invitation_id
+Show the Updated User Invitations
+
+Scenario: Pledge an Act
+Create the record in the UserActsOfKindness by User id
+Update the Users of the User record by adding the user_acts_of_kidness - by aok_id
+
+Scenario: Give a Gift
+Create the record in the UserLeads by the Name & Address
+Create the record in the UserGifts by Lead id
+Update the Users of the User record by adding the user_gifts - by gift_id
+Show the Updated User Gifts
+
+Scenario: Give a Gift Card
+Create the record in the UserLeads by the Email
+Create the record in the UserGiftCards by Lead id
+Update the Users of the User record by adding the user_gift_cards - by gift_card_id
+Show the Updated User Gifts Cards
+
+Scenario: Show User Network
+1 Up
+10 Down
+
+Scenario: Show User Invitations
+Get Records from the "UserInvitations" by the invitation_ids in the "User" Record
+
+Scenario: Show User Impact - Gift Cards
+Get Records from the "UserGiftCards" by the gift_card_ids in the "User" Record
+
+Scenario: Show User Impact - Gifts
+Get Records from the "UserGifts" by the gift_ids in the "User" Record
+
+Scenario: Show User Impact - AOKs
+Get Records from the "UserActsOfKindness" by the aok_ids in the "User" Record
+
+
+Dev Notes:
+
+/**
+ * Read the Key
+ */
+writeUserData() {
+  var myRef = firebase.database().ref().push();
+  var key = myRef.key();
+
+  var newData={
+      id: key,
+      Website_Name: this.web_name.value,
+      Username: this.username.value,
+      Password : this.password.value,
+      website_link : this.web_link.value
+   }
+
+   myRef.push(newData);
+
+}

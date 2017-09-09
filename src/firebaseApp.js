@@ -29,13 +29,13 @@ export const createUser = function(email, password, fnc = (user) => console.log(
     });
 };
 
-export const joinNetwork = ({}) => {
-
-};
-
-export const setInvitation = ({}) => {
-
-};
+// export const joinNetwork = ({}) => {
+//
+// };
+//
+// export const setInvitation = ({}) => {
+//
+// };
 
 export const logout = function() {
   return firebase.auth().signOut();
