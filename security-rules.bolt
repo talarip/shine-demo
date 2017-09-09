@@ -1,0 +1,141 @@
+// Users
+// Anyone can Read all data but not email ids
+// Read Email with auth.uid = uid
+// Write a record with auth.uid = newData.uid
+path /Users/{user_id}/email {
+  read() {isCurrentUser(user_id)} 
+}
+
+path /Users/{user_id}/public {
+  read() {true}
+}
+
+path /Users/{user_id} {
+  write() {isCurrentUser(user_id)}
+}
+
+// UserParentNetworks
+// Anyone can Read
+// Write a record with auth.uid = data.uid
+path /UserParentNetworks {
+  read() {true}
+}
+
+path /UserParentNetworks/{user_id} {
+  write() {auth != null && user_id == auth.uid} 
+}
+
+// UserChildNetworks
+// Anyone can Read
+// Write a record with auth.uid != null && newData.uid = auth.uid
+path /UserChildNetworks {
+  read() {true}
+  write() {auth != null}
+}
+
+path /UserChildNetworks/{user_id}/{child_user_id} {
+  validate() {child_user_id === auth.uid}
+}
+
+// UserInvitations
+// Read only invitations auth.uid = data.sent_by_uid
+// Write when newData.sent_by_uid = auth.uid
+path /UserInvitations/{invitation_id} {
+  read() {auth != null && data.sent_by_uid == auth.uid}
+  write() {auth != null}
+  validate() {newData.hasChildren(['sent_by_uid'])}
+}
+
+path /UserInvitations/{invitation_id}/sent_by_uid {
+  validate() {newData.val() === auth.uid}
+}
+
+// UserGiftCards
+// Read only gift cards with data.sent_by_uid = auth.uid
+// Write when newData.referred_by_uid = auth.uid
+path /UserGiftCards/{gift_card_id} {
+  read() {auth != null && data.sent_by_uid == auth.uid}
+  write() {auth != null}
+  validate() {newData.hasChildren(['referred_by_uid'])}
+}
+
+path /UserGiftCards/{gift_card_id}/referred_by_uid {
+  validate() {newData.val() === auth.uid}
+}
+
+// UserGifts
+// Read only gift cards with data.sent_by_uid = auth.uid
+// Write when newData.referred_by_uid = auth.uid
+path /UserGifts/{gift_id} {
+  read() {auth != null && data.sent_by_uid == auth.uid}
+  write() {auth != null}
+  validate() {newData.hasChildren(['referred_by_uid'])}
+}
+
+path /UserGifts/{gift_id}/referred_by_uid {
+  validate() {newData.val() === auth.uid}
+}
+
+// UserActsOfKindness
+// Read by Anyone
+// Write when newData.pledged_by_uid = auth.uid
+path /UserActsOfKindness {
+  read() {true}
+  write() {auth != null}
+}
+
+path /UserActsOfKindness/{aok_id}/pledged_by_uid {
+  validate() {newData.val() === auth.uid}
+}
+
+// UserLeads
+// Read by data.referred_by_uid = auth.uid
+// Write when newData.referred_by_uid = auth.uid
+path /UserLeads {
+  read() {auth != null && data.referred_by_uid == auth.uid}
+  write() {auth != null}
+}
+
+path /UserLeads/{lead_id}/referred_by_uid {
+  validate() {newData.val() === auth.uid}
+}
+
+// Gifts
+// Read by auth.uid != null
+// Write by none
+path /Gifts {
+  read() {auth != null}
+}
+
+// GiftsCards
+// Read by auth.uid != null
+// Write by none
+path /GiftsCards {
+  read() {auth != null}
+}
+
+// ActsOfKindness
+// Read by auth.uid != null
+// Write by none
+path /ActsOfKindness {
+  read() {auth != null}
+}
+
+// GiftCardAllocationProducts
+// Read by auth.uid != null
+// Write by none
+path /GiftCardAllocationProducts {
+  read() {auth != null}
+}
+
+// MainScore
+// Read by auth.uid != null
+// Write by none
+path /MainScore {}
+
+
+// path /UserEmails
+
+
+// Define isCurrentUser() function to test if the given user id matches the currently signed-in user.
+isCurrentUser(uid) { auth != null && auth.uid == uid }
