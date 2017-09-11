@@ -1,0 +1,90 @@
+{
+  "rules": {
+    "Users": {
+      "$user_id": {
+        "email": {
+          ".read": "auth != null && auth.uid == $user_id"
+        },
+        "public": {
+          ".read": "true"
+        },
+        ".write": "auth != null && auth.uid == $user_id"
+      }
+    },
+    "UserParentNetworks": {
+      ".read": "true",
+      "$user_id": {
+        ".write": "auth != null && $user_id == auth.uid"
+      }
+    },
+    "UserChildNetworks": {
+      ".read": "true",
+      ".write": "auth != null",
+      "$user_id": {
+        "$child_user_id": {
+          ".validate": "$child_user_id == auth.uid"
+        }
+      }
+    },
+    "UserInvitations": {
+      "$invitation_id": {
+        ".validate": "newData.hasChildren(['sent_by_uid'])",
+        ".read": "auth != null && data.sent_by_uid == auth.uid",
+        ".write": "auth != null",
+        "sent_by_uid": {
+          ".validate": "newData.val() == auth.uid"
+        }
+      }
+    },
+    "UserGiftCards": {
+      "$gift_card_id": {
+        ".validate": "newData.hasChildren(['referred_by_uid'])",
+        ".read": "auth != null && data.sent_by_uid == auth.uid",
+        ".write": "auth != null",
+        "referred_by_uid": {
+          ".validate": "newData.val() == auth.uid"
+        }
+      }
+    },
+    "UserGifts": {
+      "$gift_id": {
+        ".validate": "newData.hasChildren(['referred_by_uid'])",
+        ".read": "auth != null && data.sent_by_uid == auth.uid",
+        ".write": "auth != null",
+        "referred_by_uid": {
+          ".validate": "newData.val() == auth.uid"
+        }
+      }
+    },
+    "UserActsOfKindness": {
+      ".read": "true",
+      ".write": "auth != null",
+      "$aok_id": {
+        "pledged_by_uid": {
+          ".validate": "newData.val() == auth.uid"
+        }
+      }
+    },
+    "UserLeads": {
+      ".read": "auth != null && data.referred_by_uid == auth.uid",
+      ".write": "auth != null",
+      "$lead_id": {
+        "referred_by_uid": {
+          ".validate": "newData.val() == auth.uid"
+        }
+      }
+    },
+    "Gifts": {
+      ".read": "auth != null"
+    },
+    "GiftsCards": {
+      ".read": "auth != null"
+    },
+    "ActsOfKindness": {
+      ".read": "auth != null"
+    },
+    "GiftCardAllocationProducts": {
+      ".read": "auth != null"
+    }
+  }
+}
