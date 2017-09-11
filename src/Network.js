@@ -15,20 +15,58 @@ const Network = (props) => {
     return <NetworkAuth {...props} />;
   }
 
-  const {match, handleJoinNetwork } = props;
-  const parseId = (id) => /^[a-zA-Z0-9_]+$/.test(id) ? id : null;
-  const invitationId = parseId(match.params.invitationId);
+  const { handleJoinNetwork, handleJoinNetworkAuth } = props;
+  const parseId = (id) => /^[a-zA-Z0-9_-]+$/.test(id) ? id : null;
 
-  const join = (e) => {
+  const joinNew = (e) => {
     e.preventDefault();
     const form = e.target.form;
+    const invitationId = parseId(props.match.params.invitationId);
+    const email = form.elements.inviteEmail.value;
+    const password = form.elements.password.value;
+    const creds = {
+      email,
+      password
+    };
+
     const joinInfo = {
-      email: form.elements.inviteEmail.value,
-      invitationId: invitationId
+      email,
+      invitationId
     }
 
-    handleJoinNetwork(joinInfo);
+    props
+      .handleCreateAccount(creds)
+      .then(() => {
+        return handleJoinNetwork(joinInfo);
+      });
   };
+
+  const joinExisting = (e) => {
+    e.preventDefault();
+    const form = e.target.form;
+    const invitationId = parseId(props.match.params.invitationId);
+    const email = form.elements.joinEmail.value;
+    const password = form.elements.password.value;
+
+    const creds = {
+      email,
+      password
+    };
+
+    const joinInfo = {
+      email,
+      invitationId
+    }
+
+    props
+      .handleLogin(creds)
+      .then(() => {
+        form.elements.joinEmail.value = '';
+        form.elements.password.value = '';
+        return handleJoinNetworkAuth(joinInfo);
+      });
+  };
+
 
   return (
     <div className="Network container">
@@ -43,7 +81,7 @@ const Network = (props) => {
           <label htmlFor="exampleInputPassword1">Password</label>
           <input type="password" className="form-control" id="exampleInputPassword1" name="password" placeholder="Password" />
         </div>
-        <button className="btn btn-primary" onClick={join}>Create Account & Join Now</button> Or <button className="btn btn-primary" onClick={join}>Sign In & Join Now</button>
+        <button className="btn btn-primary" onClick={joinNew}>Create Account & Join Now</button> Or <button className="btn btn-primary" onClick={joinExisting}>Sign In & Join Now</button>
       </form>
     </div>
   );

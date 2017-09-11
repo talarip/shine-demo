@@ -16,8 +16,8 @@ const db = Database(firebaseApp);
 // const refUsers = db().ref('Users');
 const getDBRef = (refKey) => db().ref(refKey);
 // const refNetworks = db().ref('Networks');
-// const refParentNetworks = db().ref('UserParentNetworks');
-// const refChildNetworks = db().ref('UserChildNetworks');
+const refParentNetworks = db().ref('UserParentNetworks');
+const refChildNetworks = db().ref('UserChildNetworks');
 const refInvitations = db().ref('Invitations');
 const refUserLeads = db().ref('UserLeads');
 const NULL_VAL = '';
@@ -33,6 +33,8 @@ class Main extends Component {
       invitations: [],
       sentInvitations: [],
       invitationsInfo: {},
+      createUser: createUser,
+      login: login,
       isAuth: this.isAuth.bind(this),
       handleLogin: this.handleLogin.bind(this),
       handleCreateAccount: this.handleCreateAccount.bind(this),
@@ -51,34 +53,35 @@ class Main extends Component {
 
   // Login
   handleLogin(creds) {
-    login(creds.email, creds.password, (user) => {
+    return login(creds.email, creds.password, (user) => {
       if (!user || !user.uid) {
         this.setState({uid: null});
-        return;
+        return firebaseApp.Promise.resolve(null);
       }
 
       console.log('Retreiving User Info On Login', user);
       const uid = user.uid;
       const currentUserRef = db().ref('Users/' + uid)
 
-      currentUserRef
+      return currentUserRef
         .once('value')
         .then((data) => {
           const userInfo = data.val();
           console.log('User Info Queried On Login', userInfo);
 
           if (!userInfo) {
-            return;
+            return firebaseApp.Promise.resolve(null);
           }
 
           const {email, uname, fullname} = userInfo;
           console.log('User Info Retreived On Login', userInfo);
 
           if (!userInfo) {
-            return;
+            return firebaseApp.Promise.resolve(null);
           }
 
           console.log('Setting User Info To State', userInfo);
+
           this.setState({
             uid,
             email,
@@ -86,7 +89,12 @@ class Main extends Component {
             fullname
           });
 
-          // this.queryInvitations();
+          return firebaseApp.Promise.resolve({
+            uid,
+            email,
+            uname,
+            fullname
+          });
         });
     });
   }
@@ -271,23 +279,49 @@ class Main extends Component {
 
   // ~ Needs Work
   handleJoinNetwork(joinInfo) {
-    // const {netId, invitationId, email, password} = joinInfo;
-    // console.log('joinInfo', joinInfo);
+    console.log('joinInfo', joinInfo);
 
-    // KtJGOrUlqlT_sA_ShAl/KtJKzgmA_CI999WJo5f
 
-    // // First Attempt To Create User Account
-    // this
-    //   .handleCreateAccount({email, password})
-    //   .then(() => {
-    //     console.log('isPromise', true);
-    //   })
-    //   .catch((err) => console.log('error', err))
-    //   .then(() => console.log('continue'))
+
   }
 
-  handleJoinNetworkAuth() {
+  handleJoinNetworkAuth(joinInfo) {
+    // Scenario: Join - Join an Existing Network by Invitation
+    // IF Logged in - Search the record in the Users by User ID
+    // Else - Create the record in "Users"
+    // Update the "UserInvitations" by invitation id to Accepted
+    // Create\Update the "UserParentNetworks" by the New User ID
+    // Create\Update the "UserChildNetworks" by the Parent User ID
 
+    const { email, uid, invitationsInfo } = this.state;
+    const { invitationId } = joinInfo;
+    const invitationInfo = invitationsInfo[invitationId];
+
+    console.log('network invitationsInfo', invitationsInfo);
+    console.log('network invitationInfo', invitationInfo);
+
+    if (!invitationInfo || email.toLowerCase() === invitationInfo.email.toLowerCase()) {
+      return firebaseApp.Promise.resolve(null);
+    }
+
+    const { sent_by_uid } = invitationInfo;
+    const promises = [];
+
+    // promises.push(
+    //   refInvitations
+    //     .child(invitationId)
+    //     .set()
+    // );
+    //
+    // promises.push(
+    //   refParentNetworks
+    //     .child(uid)
+    // );
+    //
+    // promises.push(
+    //   refChildNetworks
+    //     .child(sent_by_uid);
+    // );
   }
 
   handleLogOut() {
