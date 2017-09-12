@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom';
 import Login from './Login';
 import CreateAccount from './CreateAccount';
+import Connections from './Connections';
 
 const EntryPage = (props) => {
   return (
@@ -79,6 +80,7 @@ class App extends Component {
             <Route path="/top-influencers" render={renderComponent(TopInfluencers, this.props)} />
             <Route path="/login" render={renderComponent(Login, this.props)} />
             <Route path="/create-account"  render={renderComponent(CreateAccount, this.props)} />
+            <Route exact path="/connections" render={renderComponent(Connections, this.props)} />
             <Route render={renderComponent(EntryPage, this.props)}/>
           </Switch>
 

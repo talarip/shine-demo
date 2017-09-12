@@ -12,6 +12,7 @@ import { Database } from './Database';
 // import Invitation from './Invitation';
 import Network from './Network';
 import Dashboard from './Dashboard';
+// import Connections from './Connections';
 const db = Database(firebaseApp);
 // const refUsers = db().ref('Users');
 const getDBRef = (refKey) => db().ref(refKey);
@@ -33,6 +34,8 @@ class Main extends Component {
       invitations: [],
       sentInvitations: [],
       invitationsInfo: {},
+      graphData: {},
+      loadingGraphData: true,
       createUser: createUser,
       login: login,
       isAuth: this.isAuth.bind(this),
@@ -43,6 +46,7 @@ class Main extends Component {
       handleJoinNetwork: this.handleJoinNetwork.bind(this),
       handleJoinNetworkAuth: this.handleJoinNetworkAuth.bind(this),
       getInvitationInfo: this.getInvitationInfo.bind(this),
+      getNetworkData: this.getNetworkData.bind(this),
       refreshInvitations: this.refreshInvitations.bind(this)
     };
   }
@@ -349,10 +353,95 @@ class Main extends Component {
     this.setState({
       uid: null,
       email: null,
-      uname: null
+      uname: null,
+      netId: null,
+      invitations: [],
+      sentInvitations: [],
+      invitationsInfo: {},
+      graphData: {},
+      loadingGraphData: true,
     });
 
     logout();
+  }
+
+  getNetworkData() {
+    const { uid, email } = this.state;
+    const graphData = {
+      nodes: [
+        {id: 1, label: 'Paul'},
+        {id: 2, label: 'Philip'},
+        {id: 3, label: 'Cory'},
+        {id: 4, label: 'Dave'},
+        {id: 5, label: 'Toby'}
+      ],
+      edges: [
+        {from: 1, to: 2},
+        {from: 1, to: 3},
+        {from: 2, to: 4},
+        {from: 2, to: 5}
+      ]
+    };
+
+    if (!uid) {
+      this.setState({
+        graphData: graphData,
+        loadingGraphData: false
+      });
+
+      return firebaseApp.Promise.resolve({
+        graphData: graphData,
+        loadingGraphData: false
+      });
+    }
+
+    const parseUname = (email) => email.split('@')[0];
+
+    return getDBRef('UserChildNetworks/' + uid)
+      .once('value')
+      .then((data) => {
+        const nodes = [];
+        const edges = [];
+        const childNetworksData = data.val();
+        const childNetworksList = Object.keys(childNetworksData);
+        const originNode = {id: uid, label: parseUname(email)};
+        const nodeList = [uid];
+
+        const realGraphData = childNetworksList
+          .map((networkId) => {
+            const networkNode = {
+              id: networkId,
+              label: parseUname(childNetworksData[networkId])
+            };
+            const networkEdge = {
+              from: uid,
+              to: networkId
+            };
+
+            return {
+              node: networkNode,
+              edge: networkEdge
+            };
+          })
+          .reduce((graph, item) => {
+            graph.nodes.push(item.node);
+            graph.edges.push(item.edge);
+            return graph;
+          }, {nodes: [originNode], edges:[]})
+
+          // Temporary Data
+          this.setState({
+            graphData: realGraphData,
+            loadingGraphData: false
+          });
+
+          return firebaseApp.Promise.resolve({
+            graphData: realGraphData,
+            loadingGraphData: false
+          });
+      })
+
+
   }
 
   componentDidMount() {

@@ -6,7 +6,7 @@ import {
   Link,
 } from 'react-router-dom';
 import Invitation from './Invitation';
-
+import Connections from './Connections';
 
 // const Invitations = (props) => {
 //   console.log('invitations props', props);
@@ -157,6 +157,7 @@ class Dashboard extends Component {
             <Route exact path="/dashboard/invitations-sent"  render={renderComponent(SentInvitations, this.props)} />
             <Route exact path="/dashboard/gift-cards-sent"  component={SentGiftCards} />
             <Route exact path="/dashboard/gift-sent"  component={SentGifts} />
+            <Route exact path="/dashboard/connections" render={renderComponent(Connections, this.props)} />
             <Route component={DashboardDefault}/>
           </Switch>
 
@@ -183,6 +184,7 @@ class Dashboard extends Component {
 
           <h4>Your Generosity Effect</h4>
           <ul>
+            <li><Link to="/dashboard/connections">Your Connections</Link></li>
             <li><Link to="/dashboard/invitations-sent">Invitations Sent</Link></li>
             <li><Link to="/dashboard/gift-cards-sent">Gift Cards Sent</Link></li>
             <li><Link to="/dashboard/gift-sent">Gifts Sent</Link></li>
