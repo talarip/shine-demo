@@ -99,7 +99,7 @@ const SentInvitations = (props) => {
     <div>
       <h4>Invitations Sent</h4>
       <ul>
-        {sentInvitations.map((invitation, key) => <li key={key}><a href={invitation.url}>{invitation.id}</a></li>)}
+        {sentInvitations.map((invitation, key) => <li key={key}>Invitation To  <a href={invitation.url}>{invitation.id}</a></li>)}
       </ul>
     </div>
   );

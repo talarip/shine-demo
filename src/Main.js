@@ -16,8 +16,8 @@ const db = Database(firebaseApp);
 // const refUsers = db().ref('Users');
 const getDBRef = (refKey) => db().ref(refKey);
 // const refNetworks = db().ref('Networks');
-const refParentNetworks = db().ref('UserParentNetworks');
-const refChildNetworks = db().ref('UserChildNetworks');
+// const refParentNetworks = db().ref('UserParentNetworks');
+// const refChildNetworks = db().ref('UserChildNetworks');
 const refInvitations = db().ref('Invitations');
 const refUserLeads = db().ref('UserLeads');
 const NULL_VAL = '';
@@ -113,7 +113,7 @@ class Main extends Component {
           'uid': user.uid,
           'email': user.email,
           'uname': uname,
-          'fullName': fullName
+          'fullName': fullName || uname || 'none',
         })
         .then(() => {
           console.log('Setting User Info To State');
@@ -174,7 +174,7 @@ class Main extends Component {
   // ~ Needs Work
   handleInvite(invitation, { history }) {
     console.log('invitation', invitation);
-    const { uid } = this.state;
+    const { uid, email } = this.state;
     // Invite Others
     // Create the record in the UserLeads by the Email
     // Create the record in the UserInvitations by Lead id
@@ -214,6 +214,8 @@ class Main extends Component {
     userInvitation
       .set({
         'sent_by_uid': uid,
+        'to_email': invitation.email,
+        'from_email': email,
         'email': invitation.email,
         'to': userLeadId,
         'lead_id': userLeadId,
@@ -256,6 +258,8 @@ class Main extends Component {
           }
         });
 
+        return invitationInfo;
+
         // const { sent_by_uid } = invitationInfo;
 
         // if (sent_by_uid) {
@@ -281,8 +285,7 @@ class Main extends Component {
   handleJoinNetwork(joinInfo) {
     console.log('joinInfo', joinInfo);
 
-
-
+    this.handleJoinNetworkAuth(joinInfo);
   }
 
   handleJoinNetworkAuth(joinInfo) {
@@ -292,36 +295,54 @@ class Main extends Component {
     // Update the "UserInvitations" by invitation id to Accepted
     // Create\Update the "UserParentNetworks" by the New User ID
     // Create\Update the "UserChildNetworks" by the Parent User ID
-
-    const { email, uid, invitationsInfo } = this.state;
     const { invitationId } = joinInfo;
-    const invitationInfo = invitationsInfo[invitationId];
+    const connectToNetwork = (invitationInfo) => {
+      const { email, uid } = this.state;
 
-    console.log('network invitationsInfo', invitationsInfo);
-    console.log('network invitationInfo', invitationInfo);
+      console.log('network invitationInfo', invitationInfo);
+      console.log('Same Email On Invitation', invitationInfo || email.toLowerCase() === invitationInfo.to_email.toLowerCase())
 
-    if (!invitationInfo || email.toLowerCase() === invitationInfo.email.toLowerCase()) {
-      return firebaseApp.Promise.resolve(null);
-    }
+      if (!invitationInfo || email.toLowerCase() !== invitationInfo.to_email.toLowerCase()) {
+        return firebaseApp
+          .Promise
+          .resolve(null)
+          .then(() => {
+            console.log('something went wrong!');
+          });
+      }
 
-    const { sent_by_uid } = invitationInfo;
-    const promises = [];
+      const { sent_by_uid, to_email, from_email } = invitationInfo;
+      const promises = [];
 
-    // promises.push(
-    //   refInvitations
-    //     .child(invitationId)
-    //     .set()
-    // );
-    //
-    // promises.push(
-    //   refParentNetworks
-    //     .child(uid)
-    // );
-    //
-    // promises.push(
-    //   refChildNetworks
-    //     .child(sent_by_uid);
-    // );
+      promises.push(
+        refInvitations
+          .child(invitationId + '/accepted')
+          .set(1)
+      );
+
+      promises.push(
+        getDBRef('UserChildNetworks/' + sent_by_uid)
+          .child(uid)
+          .set(to_email)
+      );
+
+      promises.push(
+        getDBRef('UserParentNetworks/' + uid)
+          .child(sent_by_uid)
+          .set(from_email)
+      );
+
+      return firebaseApp
+        .Promise
+        .all(promises)
+        .then(() => {
+          console.log('network added');
+        })
+    };
+
+    return this
+      .getInvitationInfo(invitationId)
+      .then(connectToNetwork);
   }
 
   handleLogOut() {

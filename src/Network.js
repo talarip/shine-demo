@@ -22,7 +22,7 @@ const Network = (props) => {
     e.preventDefault();
     const form = e.target.form;
     const invitationId = parseId(props.match.params.invitationId);
-    const email = form.elements.inviteEmail.value;
+    const email = form.elements.joinEmail.value;
     const password = form.elements.password.value;
     const creds = {
       email,
@@ -56,7 +56,7 @@ const Network = (props) => {
     const joinInfo = {
       email,
       invitationId
-    }
+    };
 
     props
       .handleLogin(creds)
