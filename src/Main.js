@@ -359,7 +359,7 @@ class Main extends Component {
       sentInvitations: [],
       invitationsInfo: {},
       graphData: {},
-      loadingGraphData: true,
+      loadingGraphData: true
     });
 
     logout();
@@ -397,26 +397,36 @@ class Main extends Component {
 
     const parseUname = (email) => email.split('@')[0];
 
-    return getDBRef('UserChildNetworks/' + uid)
-      .once('value')
-      .then((data) => {
-        const nodes = [];
-        const edges = [];
-        const childNetworksData = data.val();
-        const childNetworksList = Object.keys(childNetworksData);
-        const originNode = {id: uid, label: parseUname(email)};
-        const nodeList = [uid];
+    const getNetworkNodes = (id) => {
+      return getDBRef('UserChildNetworks/' + id)
+        .once('value')
+        .then((data) =>  data.val());
+    };
 
-        const realGraphData = childNetworksList
+    const plotNetworks = (originId) => {
+      const mapGraphData = (fromId, networkData, currentGraphData, level = 1) => {
+        if (!networkData || !Object.keys(networkData).length) {
+          return null;
+        }
+
+        const networksList = Object.keys(networkData);
+        return networksList
           .map((networkId) => {
-            const networkNode = {
+            let networkNode = {
               id: networkId,
-              label: parseUname(childNetworksData[networkId])
+              label: parseUname(networkData[networkId]),
+              level: level
             };
-            const networkEdge = {
-              from: uid,
+
+            let networkEdge = {
+              from: fromId,
               to: networkId
             };
+
+            if (currentGraphData.nodeList.includes(networkId)) {
+              networkNode = null;
+              networkEdge = null;
+            }
 
             return {
               node: networkNode,
@@ -424,22 +434,98 @@ class Main extends Component {
             };
           })
           .reduce((graph, item) => {
-            graph.nodes.push(item.node);
-            graph.edges.push(item.edge);
+            if (item.node) {
+              graph.nodeList.push(item.node.id);
+              graph.nodes.push(item.node);
+              graph.edges.push(item.edge);
+            }
+
             return graph;
-          }, {nodes: [originNode], edges:[]})
+          }, currentGraphData);
+      };
 
-          // Temporary Data
-          this.setState({
-            graphData: realGraphData,
-            loadingGraphData: false
-          });
+      return getNetworkNodes(originId)
+        .then((childNetworksData) => {
+          let level = 0;
+          const maxDepth = 10;
+          const initialGraph = {
+            nodes: [{id: originId, label: parseUname(email), level: level}],
+            edges: [],
+            nodeList: [originId]
+          };
+          const defaultGraph = {
+            nodes: initialGraph.nodes,
+            edges: initialGraph.edges
+          }
 
-          return firebaseApp.Promise.resolve({
-            graphData: realGraphData,
-            loadingGraphData: false
-          });
-      })
+          let currentGraphData = mapGraphData(originId, childNetworksData, initialGraph, ++level);
+
+          if (!currentGraphData) {
+            return defaultGraph;
+          }
+
+          const showNextGraphLevel = (_graphData, depthLevel, excludeFromList) => {
+            const childNetworkList = _graphData.nodeList.filter((item) => !excludeFromList.includes(item));
+            console.log('nodeList',  _graphData.nodeList.length);
+            console.log('excludeFromList', excludeFromList);
+            console.log('includeList', childNetworkList);
+            if (!childNetworkList.length) {
+              return firebaseApp.Promise.resolve(_graphData);
+            }
+
+            const promiseChain = childNetworkList
+              .reduce((currentPromise, childNetworkId) => {
+                return currentPromise
+                  .then((_graphDataVal) => {
+                    return getNetworkNodes(childNetworkId)
+                      .then((childNetworkData) => {
+                        console.log('requested network nodes for', childNetworkId, childNetworkData);
+                        return mapGraphData(childNetworkId, childNetworkData, _graphDataVal, depthLevel);
+                      })
+
+                  });
+              }, firebaseApp.Promise.resolve(_graphData));
+
+              return promiseChain
+                .then((_graphDataVal) => {
+                  console.log('depthLevel', depthLevel, 'maxDepth', maxDepth, 'less than max depth', depthLevel < maxDepth);
+                  if (depthLevel < maxDepth) {
+                    // Recurvise Call - Watch Out!
+                    return showNextGraphLevel(_graphDataVal, depthLevel + 1, childNetworkList);
+                  }
+
+                  return _graphDataVal;
+                })
+                .catch(() => !!_graphData && _graphData || defaultGraph)
+          };
+
+          const childNetworksPromise = showNextGraphLevel(currentGraphData, ++level, [originId]);
+
+          return childNetworksPromise
+            .then(() => currentGraphData);
+        });
+    };
+
+    plotNetworks(uid)
+      .then((networkGraph) => {
+        console.log('networkGraph', networkGraph);
+
+        this.setState({
+          graphData: {
+            nodes: networkGraph.nodes,
+            edges: networkGraph.edges
+          },
+          loadingGraphData: false
+        });
+
+        return firebaseApp.Promise.resolve({
+          graphData: {
+            nodes: networkGraph.nodes,
+            edges: networkGraph.edges
+          },
+          loadingGraphData: false
+        });
+      });
 
 
   }
