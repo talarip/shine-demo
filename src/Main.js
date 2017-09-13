@@ -496,7 +496,13 @@ class Main extends Component {
 
                   return _graphDataVal;
                 })
-                .catch(() => !!_graphData && _graphData || defaultGraph)
+                .catch(() => {
+                  if (!!_graphData) {
+                    return _graphData
+                  }
+
+                  return defaultGraph
+                });
           };
 
           const childNetworksPromise = showNextGraphLevel(currentGraphData, ++level, [originId]);
